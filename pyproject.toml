@@ -1,0 +1,83 @@
+[build-system]
+requires = ["setuptools==83.0.0", "wheel==0.47.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "verirun"
+version = "0.1.0.dev0"
+description = "Evidence-first runtime for reproducible executable evaluation and rewards"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+  { name = "VeriRun contributors" },
+]
+keywords = [
+  "llm-evaluation",
+  "benchmark",
+  "reproducibility",
+  "rlvr",
+  "reward-runtime",
+]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Typing :: Typed",
+]
+dependencies = [
+  "pydantic>=2.10,<3",
+]
+
+[project.optional-dependencies]
+evalplus = [
+  "evalplus==0.3.1",
+]
+dev = [
+  "build>=1.2,<2",
+  "mypy>=1.14,<2",
+  "pytest>=8.3,<9",
+  "pytest-cov>=6,<7",
+  "ruff>=0.9,<1",
+]
+
+[project.scripts]
+verirun = "verirun.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/aaron-for-value/VeriRun"
+Repository = "https://github.com/aaron-for-value/VeriRun"
+Issues = "https://github.com/aaron-for-value/VeriRun/issues"
+Roadmap = "https://github.com/aaron-for-value/VeriRun/blob/main/ROADMAP.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+verirun = ["py.typed"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["verirun"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 85
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["verirun"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]

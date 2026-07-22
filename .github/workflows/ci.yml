@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install core and development dependencies
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements/core-dev.lock.txt
+          python -m pip install --disable-pip-version-check -e . --no-deps
+      - name: Lint
+        run: python -m ruff check .
+      - name: Format check
+        run: python -m ruff format --check .
+      - name: Type check
+        run: python -m mypy src
+      - name: Verify exported protocol schemas
+        run: python scripts/export_schemas.py --check
+      - name: Test
+        run: python -m pytest --cov=verirun --cov-report=term-missing
+      - name: Build distributions
+        run: python -m build
+      - name: Run trusted synthetic smoke twice
+        run: python -m verirun smoke --output .verirun/evidence/v0.1/synthetic

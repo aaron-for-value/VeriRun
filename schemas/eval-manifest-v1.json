@@ -1,0 +1,326 @@
+{
+  "$defs": {
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 1,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "relative_path": {
+          "minLength": 1,
+          "title": "Relative Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "sha256",
+        "size_bytes",
+        "media_type",
+        "relative_path"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "BenchmarkSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "dataset_hash": {
+          "pattern": "^(?:md5:[0-9a-f]{32}|sha256:[0-9a-f]{64})$",
+          "title": "Dataset Hash",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "split": {
+          "minLength": 1,
+          "title": "Split",
+          "type": "string"
+        },
+        "standard_protocol": {
+          "title": "Standard Protocol",
+          "type": "boolean"
+        },
+        "subset_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subset Label"
+        },
+        "task_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Task Ids",
+          "type": "array"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "dataset_hash",
+        "split",
+        "task_ids",
+        "standard_protocol"
+      ],
+      "title": "BenchmarkSpec",
+      "type": "object"
+    },
+    "Candidate": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "minLength": 1,
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "language": {
+          "const": "python",
+          "default": "python",
+          "title": "Language",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "task_id": {
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "task_id",
+        "source"
+      ],
+      "title": "Candidate",
+      "type": "object"
+    },
+    "ExecutionSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "concurrency": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Concurrency",
+          "type": "integer"
+        },
+        "engine": {
+          "const": "local",
+          "default": "local",
+          "title": "Engine",
+          "type": "string"
+        },
+        "retry_policy": {
+          "const": "none",
+          "default": "none",
+          "title": "Retry Policy",
+          "type": "string"
+        },
+        "sandbox_policy": {
+          "const": "trusted-fixtures-only",
+          "default": "trusted-fixtures-only",
+          "title": "Sandbox Policy",
+          "type": "string"
+        }
+      },
+      "title": "ExecutionSpec",
+      "type": "object"
+    },
+    "GenerationSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "max_tokens": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Max Tokens",
+          "type": "integer"
+        },
+        "n": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "N",
+          "type": "integer"
+        },
+        "seed": {
+          "default": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "temperature": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Temperature",
+          "type": "number"
+        },
+        "top_p": {
+          "default": 1.0,
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Top P",
+          "type": "number"
+        }
+      },
+      "title": "GenerationSpec",
+      "type": "object"
+    },
+    "ModelSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "endpoint_type": {
+          "minLength": 1,
+          "title": "Endpoint Type",
+          "type": "string"
+        },
+        "model_revision": {
+          "minLength": 1,
+          "title": "Model Revision",
+          "type": "string"
+        },
+        "tokenizer_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokenizer Revision"
+        }
+      },
+      "required": [
+        "endpoint_type",
+        "model_revision"
+      ],
+      "title": "ModelSpec",
+      "type": "object"
+    },
+    "VerifierSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "minLength": 1,
+          "title": "Adapter",
+          "type": "string"
+        },
+        "image_digest": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image Digest"
+        },
+        "max_output_bytes": {
+          "default": 65536,
+          "exclusiveMinimum": 0,
+          "title": "Max Output Bytes",
+          "type": "integer"
+        },
+        "tests": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "timeout_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Timeout Seconds",
+          "type": "number"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "adapter",
+        "version",
+        "tests",
+        "timeout_seconds"
+      ],
+      "title": "VerifierSpec",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "benchmark": {
+      "$ref": "#/$defs/BenchmarkSpec"
+    },
+    "candidate": {
+      "$ref": "#/$defs/Candidate"
+    },
+    "execution": {
+      "$ref": "#/$defs/ExecutionSpec"
+    },
+    "generation": {
+      "$ref": "#/$defs/GenerationSpec"
+    },
+    "model": {
+      "$ref": "#/$defs/ModelSpec"
+    },
+    "run_id": {
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "verirun.eval-manifest/v1",
+      "default": "verirun.eval-manifest/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "verifier": {
+      "$ref": "#/$defs/VerifierSpec"
+    }
+  },
+  "required": [
+    "run_id",
+    "benchmark",
+    "model",
+    "generation",
+    "candidate",
+    "verifier",
+    "execution"
+  ],
+  "title": "EvalManifest",
+  "type": "object"
+}

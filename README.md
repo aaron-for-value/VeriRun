@@ -3,7 +3,7 @@
 **Evidence-first infrastructure for reproducible, isolated executable evaluation and online rewards.**
 
 > [!IMPORTANT]
-> VeriRun is pre-alpha. The repository is establishing its public contracts and delivery roadmap; there is no supported runnable release yet. Do not execute model-generated code on a host machine based on this repository.
+> VeriRun is pre-alpha. The v0.1 protocol baseline is runnable for trusted fixtures and is still under release verification. The local executor is not a security boundary: do not use it for model-generated or otherwise untrusted code.
 
 VeriRun is a distributed runtime for code and agent evaluation workloads whose results must be reproducible, recoverable, attributable, and safe enough for the declared threat model. It is designed to run versioned benchmarks, preserve complete execution lineage, separate model failures from infrastructure failures, and expose the same verifier path to asynchronous post-training reward loops.
 
@@ -74,7 +74,7 @@ The control plane owns intent and durable state. The execution plane performs re
 
 | Capability | Target | Status |
 |---|---|---|
-| Immutable manifests, hashing, structured verification, deterministic replay | v0.1 | Planned |
+| Immutable manifests, hashing, structured verification, deterministic replay | v0.1 | **In verification** |
 | Bounded async model gateway with cancellation and classified retries | v0.2 | Planned |
 | Container development backend and Kubernetes + gVisor validation backend | v0.3 | Planned |
 | Durable run state, leases, heartbeats, replay, and idempotent commit | v0.4 | Planned |
@@ -87,9 +87,9 @@ See the evidence gates and current work in the [Roadmap](ROADMAP.md).
 
 ## First usable release: v0.1
 
-v0.1 will establish the protocol baseline before distributed infrastructure is introduced.
+v0.1 establishes the protocol baseline before distributed infrastructure is introduced.
 
-It will provide:
+The current release candidate provides:
 
 - a versioned `EvalManifest` contract;
 - content hashes for benchmark data, prompts, candidates, tests, and runner artifacts;
@@ -122,7 +122,7 @@ Executable evaluation means running untrusted code. VeriRun will not use vague c
 - The attack suite will cover infinite loops, memory exhaustion, process bombs, host-file reads, network access, disk exhaustion, stdout flooding, and signal-handling escape attempts.
 - Residual risks and environment assumptions will be published alongside results.
 
-If you discover a security issue, do not open a public issue. A private reporting process will be published before the first executable release.
+If you discover a security issue, do not open a public issue. Follow the private reporting process in [SECURITY.md](SECURITY.md).
 
 ## Evidence over screenshots
 
@@ -167,26 +167,50 @@ The detailed label taxonomy, issue requirements, and release gates are in the [R
 
 ## Repository map
 
-The repository is intentionally small during foundation work:
+The repository keeps protocol, implementation, evidence, and governance artifacts explicit:
 
 ```text
 VeriRun/
-├── README.md           # Product contract, architecture, status, and trust boundaries
-├── ROADMAP.md          # Evidence-gated releases and GitHub execution model
-├── CONTRIBUTING.md     # Contribution and evidence contract
-├── SECURITY.md         # Private vulnerability reporting and security scope
-├── CODE_OF_CONDUCT.md  # Community participation standards
-├── .github/            # Ownership, issue forms, and pull-request template
-└── docs/               # Architecture, ADRs, protocols, and evidence reports (planned)
+├── src/verirun/        # Protocol, artifacts, executors, adapters, replay, and CLI
+├── tests/              # Unit, classification, adapter, and replay tests
+├── schemas/            # CI-checked public JSON Schemas
+├── evidence/           # Reproducible milestone evidence (added after clean runs)
+├── docs/               # ADRs, compatibility, and versioning policy
+├── BENCHMARK_PROTOCOL.md
+├── ROADMAP.md
+└── .github/            # CI, ownership, issue forms, and pull-request template
 ```
 
-Source code, tests, examples, deployment manifests, and reports will be added only with the milestone that owns their contract.
+Infrastructure is added only when the milestone that owns its contract can also provide acceptance evidence.
 
 ## Installation and development
 
-There is no supported installation yet. The first development environment will target Python 3.12 with a locked, project-local dependency environment.
+The supported v0.1 development environment is Python 3.12 in a project-local environment:
 
-The v0.1 gate includes reproducible setup instructions and a runnable CLI. Until that gate is met, commands shown in design discussions must not be treated as a stable interface.
+```bash
+conda create --prefix .venv python=3.12 pip -y
+./.venv/bin/python -m pip install -r requirements/core-dev.lock.txt
+./.venv/bin/python -m pip install -e . --no-deps
+make check
+```
+
+Run the trusted synthetic protocol and replay smoke directly with:
+
+```bash
+./.venv/bin/python -m verirun smoke --output evidence/v0.1/synthetic
+```
+
+The pinned EvalPlus adapter remains optional because its upstream dependency tree is substantially larger than VeriRun core:
+
+```bash
+./.venv/bin/python -m pip install -r requirements/evalplus-v0.1.lock.txt
+./.venv/bin/python -m pip install -e . --no-deps
+./.venv/bin/python -m verirun evalplus-smoke --output evidence/v0.1/evalplus
+```
+
+The EvalPlus command runs a labeled three-task HumanEval+ compatibility subset twice. It does not produce a standard benchmark score. See [BENCHMARK_PROTOCOL.md](BENCHMARK_PROTOCOL.md) for the exact claim boundary.
+
+EvalPlus v0.3.1's memory `setrlimit` path is incompatible with Darwin on the current supported macOS environment. For this built-in deterministic trusted smoke only, macOS evidence is run with `EVALPLUS_MAX_MEMORY_BYTES=-1`; the setting is recorded in the report. Linux verification keeps the upstream default. Neither path is sandbox evidence.
 
 ## Contributing
 

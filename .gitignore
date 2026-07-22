@@ -11,8 +11,19 @@ node_modules/
 .venv/
 venv/
 __pycache__/
+*.egg-info/
+.coverage
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+htmlcov/
 
 # Local Codex planning records
 task_plan.md
 findings.md
 progress.md
+
+# Local VeriRun working state
+.verirun/

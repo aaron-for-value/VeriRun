@@ -1,0 +1,134 @@
+{
+  "$defs": {
+    "EvalPlusPhaseResult": {
+      "additionalProperties": false,
+      "description": "Raw EvalPlus phase result without invented error categories.",
+      "properties": {
+        "details": {
+          "items": {
+            "type": "boolean"
+          },
+          "title": "Details",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "timeout"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "details"
+      ],
+      "title": "EvalPlusPhaseResult",
+      "type": "object"
+    },
+    "VerificationStatus": {
+      "enum": [
+        "passed",
+        "compile_error",
+        "test_failure",
+        "timeout",
+        "oom",
+        "policy_violation",
+        "infra_error"
+      ],
+      "title": "VerificationStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Stable, source-free evidence record for one candidate and task.",
+  "properties": {
+    "base": {
+      "$ref": "#/$defs/EvalPlusPhaseResult"
+    },
+    "candidate_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Candidate Hash",
+      "type": "string"
+    },
+    "candidate_id": {
+      "minLength": 1,
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "dataset": {
+      "enum": [
+        "humaneval",
+        "mbpp"
+      ],
+      "title": "Dataset",
+      "type": "string"
+    },
+    "dataset_digest": {
+      "pattern": "^(?:md5:[0-9a-f]{32}|sha256:[0-9a-f]{64})$",
+      "title": "Dataset Digest",
+      "type": "string"
+    },
+    "dataset_release": {
+      "minLength": 1,
+      "title": "Dataset Release",
+      "type": "string"
+    },
+    "mapped_status": {
+      "$ref": "#/$defs/VerificationStatus"
+    },
+    "package_commit": {
+      "const": "e5d0ed0bab96280b60b637ec7f15b5e4841b0cb2",
+      "default": "e5d0ed0bab96280b60b637ec7f15b5e4841b0cb2",
+      "title": "Package Commit",
+      "type": "string"
+    },
+    "package_release": {
+      "const": "v0.3.1",
+      "default": "v0.3.1",
+      "title": "Package Release",
+      "type": "string"
+    },
+    "plus": {
+      "$ref": "#/$defs/EvalPlusPhaseResult"
+    },
+    "schema_version": {
+      "const": "verirun.evalplus-task-result/v1",
+      "default": "verirun.evalplus-task-result/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "subset_digest": {
+      "pattern": "^(?:md5:[0-9a-f]{32}|sha256:[0-9a-f]{64})$",
+      "title": "Subset Digest",
+      "type": "string"
+    },
+    "subset_label": {
+      "minLength": 1,
+      "title": "Subset Label",
+      "type": "string"
+    },
+    "task_id": {
+      "minLength": 1,
+      "title": "Task Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "dataset",
+    "dataset_release",
+    "dataset_digest",
+    "subset_label",
+    "subset_digest",
+    "task_id",
+    "candidate_id",
+    "candidate_hash",
+    "base",
+    "plus",
+    "mapped_status"
+  ],
+  "title": "EvalPlusTaskResult",
+  "type": "object"
+}

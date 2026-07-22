@@ -15,9 +15,26 @@ Large design changes should begin as a design proposal issue. A technology choic
 
 ## Development setup
 
-The supported v0.1 development environment will use Python 3.12 and a project-local locked environment. Reproducible setup commands will be added with the v0.1 project skeleton.
+The supported v0.1 development environment uses Python 3.12 and a project-local environment:
 
-Until those commands exist, do not treat local experiments as supported development instructions.
+```bash
+conda create --prefix .venv python=3.12 pip -y
+./.venv/bin/python -m pip install -r requirements/core-dev.lock.txt
+./.venv/bin/python -m pip install -e . --no-deps
+make check
+```
+
+EvalPlus is an optional benchmark dependency and is installed separately:
+
+```bash
+./.venv/bin/python -m pip install -r requirements/evalplus-v0.1.lock.txt
+./.venv/bin/python -m pip install -e . --no-deps
+make evalplus-smoke
+```
+
+The default smoke targets write ignored local artifacts under `.verirun/`. Maintainers use `make evidence-synthetic` and `make evidence-evalplus` only when intentionally refreshing reviewable milestone evidence from a clean revision.
+
+Do not activate the local executor for untrusted or model-generated code. The synthetic smoke fixtures committed to this repository are the only intended v0.1 inputs for that backend.
 
 ## Contribution contract
 
