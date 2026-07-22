@@ -97,14 +97,14 @@ Run trusted EvalPlus fixtures through a stable protocol, preserve their lineage,
 
 ### Scope
 
-- Versioned `EvalManifest`, `Candidate`, `TaskAttempt`, and `VerificationResult` schemas.
-- Canonical serialization and content hashing.
-- EvalPlus adapter for versioned HumanEval+ and MBPP+ task inputs.
-- Oracle, obvious-failure, syntax-failure, and boundary-failure fixtures.
-- Executor interface with an explicitly unsafe development-only local backend.
-- Structured result classes: `passed`, `compile_error`, `test_failure`, `timeout`, `oom`, `policy_violation`, and `infra_error`.
-- Artifact layout and machine-readable replay comparison.
-- CLI for baseline verification and report generation.
+- [x] Versioned `EvalManifest`, `Candidate`, `TaskAttempt`, and `VerificationResult` schemas.
+- [x] Canonical serialization and content hashing.
+- [x] EvalPlus adapter for versioned HumanEval+ and MBPP+ task inputs.
+- [x] Oracle, obvious-failure, syntax-failure, and boundary-failure fixtures.
+- [x] Executor interface with an explicitly unsafe development-only local backend.
+- [x] Structured result classes: `passed`, `compile_error`, `test_failure`, `timeout`, `oom`, `policy_violation`, and `infra_error`.
+- [x] Artifact layout and machine-readable replay comparison.
+- [x] CLI for baseline verification and report generation.
 
 ### Exit evidence
 
@@ -115,6 +115,14 @@ Run trusted EvalPlus fixtures through a stable protocol, preserve their lineage,
 - Raw and Plus test differences are reported without mislabeling subset results as full benchmark scores.
 - Every result resolves to candidate, tests, runner identity, and manifest.
 - `BENCHMARK_PROTOCOL.md`, a baseline report, and replay fixtures are published.
+
+Current release-candidate evidence:
+
+- [Synthetic protocol smoke](evidence/v0.1/synthetic/REPORT.md)
+- [EvalPlus HumanEval+ compatibility smoke](evidence/v0.1/evalplus/REPORT.md)
+- implementation revision: `b30b11d2e3e1b20ad7c3b7e3df3f314ae7d6a64c`
+
+The milestone remains in verification until required GitHub checks pass and the review branch is merged.
 
 ### Not in scope
 

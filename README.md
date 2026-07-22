@@ -212,6 +212,15 @@ The EvalPlus command runs a labeled three-task HumanEval+ compatibility subset t
 
 EvalPlus v0.3.1's memory `setrlimit` path is incompatible with Darwin on the current supported macOS environment. For this built-in deterministic trusted smoke only, macOS evidence is run with `EVALPLUS_MAX_MEMORY_BYTES=-1`; the setting is recorded in the report. Linux verification keeps the upstream default. Neither path is sandbox evidence.
 
+## v0.1 evidence
+
+The checked-in release-candidate evidence is bound to implementation revision `b30b11d2e3e1b20ad7c3b7e3df3f314ae7d6a64c`:
+
+- [Synthetic protocol and replay report](evidence/v0.1/synthetic/REPORT.md) — five outcome classes, each executed twice with matching semantic replay identity.
+- [EvalPlus compatibility report](evidence/v0.1/evalplus/REPORT.md) — three HumanEval+ tasks, deterministic oracle and failure recipes, each executed twice through the official EvalPlus path.
+
+These reports prove the v0.1 development contract on the recorded macOS/Python environment. GitHub CI and the manually dispatched Linux EvalPlus workflow provide the cross-environment review gates; neither report is a model score or sandbox claim.
+
 ## Contributing
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request. Design feedback should be tied to a concrete invariant, failure mode, or roadmap gate. Technology adoption alone is not a project outcome.

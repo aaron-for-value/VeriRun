@@ -16,6 +16,7 @@ All notable VeriRun changes are documented here. The project follows [Semantic V
 - Python 3.12 CI, static analysis, coverage, build, and synthetic replay gates.
 - A manually dispatched Linux EvalPlus compatibility workflow with uploaded evidence.
 - Source revision and working-tree provenance in generated evidence reports.
+- Checked-in synthetic and HumanEval+ compatibility replay evidence bound to the v0.1 implementation revision.
 
 ### Security
 
