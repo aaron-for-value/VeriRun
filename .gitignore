@@ -1,0 +1,18 @@
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.mobileprovision
+.DS_Store
+node_modules/
+.venv/
+venv/
+__pycache__/
+
+# Local Codex planning records
+task_plan.md
+findings.md
+progress.md

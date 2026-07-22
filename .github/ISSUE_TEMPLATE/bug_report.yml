@@ -1,0 +1,66 @@
+name: Bug report
+description: Report a reproducible defect in VeriRun
+title: "[Bug]: "
+labels:
+  - "type: bug"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve VeriRun. Do not report security vulnerabilities here; use the private process in SECURITY.md.
+  - type: checkboxes
+    attributes:
+      label: Preflight
+      options:
+        - label: I searched existing issues and the roadmap.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true
+  - type: input
+    attributes:
+      label: Affected revision
+      description: Commit SHA, tag, or image digest.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Environment
+      description: OS, Python, dependency, container, Kubernetes, gVisor, and model/verifier versions as applicable.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction
+      description: Minimal deterministic steps, manifest, fixtures, or command.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Failure domain
+      options:
+        - Protocol or manifest
+        - Model gateway
+        - User code
+        - Verifier
+        - Sandbox
+        - Scheduler
+        - Storage or artifacts
+        - Reporting or statistics
+        - Documentation
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Evidence and artifacts
+      description: Sanitized logs, trace or attempt IDs, hashes, and report excerpts. Never include credentials or private data.

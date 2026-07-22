@@ -1,0 +1,43 @@
+name: Design proposal
+description: Propose a cross-cutting contract or architectural decision
+title: "[Design]: "
+labels:
+  - "type: design"
+  - "status: needs-design"
+body:
+  - type: textarea
+    attributes:
+      label: Decision to make
+      description: State the decision and why it is needed now.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Constraints and invariants
+      description: Include correctness, compatibility, security, operability, and scope constraints.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Options considered
+      description: Include a simpler option and the option of doing nothing.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Proposed decision
+      description: Explain the trade-offs and evidence supporting the choice.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Validation plan
+      description: How will the decision be tested or reversed?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Roadmap impact
+      description: Milestone, dependencies, scope additions, or scope reductions.
+    validations:
+      required: true

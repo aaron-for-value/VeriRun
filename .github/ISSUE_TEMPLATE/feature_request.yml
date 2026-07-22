@@ -1,0 +1,48 @@
+name: Feature request
+description: Propose a scoped, evidence-backed capability
+title: "[Feature]: "
+labels:
+  - "type: feature"
+body:
+  - type: checkboxes
+    attributes:
+      label: Preflight
+      options:
+        - label: I searched existing issues and the roadmap.
+          required: true
+        - label: I can describe the user or operator problem without relying on a specific technology.
+          required: true
+  - type: textarea
+    attributes:
+      label: Problem
+      description: Which user, operator, or runtime invariant is affected?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Proposed outcome
+      description: Describe observable behavior, not only implementation.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Scope
+      description: What is included?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Non-scope
+      description: What should explicitly remain out of this change?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Acceptance evidence
+      description: Tests, artifacts, reports, or measurable behavior required to close the issue.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Compatibility, security, and failure modes
+      description: Note migrations, trust boundaries, retries, cleanup, or new dependencies.
