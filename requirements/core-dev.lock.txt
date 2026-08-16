@@ -15,7 +15,7 @@ pydantic_core==2.46.4
 Pygments==2.20.0
 pyproject_hooks==1.2.0
 pytest==8.4.2
-pytest-cov==6.3.0
+pytest-cov==7.1.0
 ruff==0.15.22
 setuptools==83.0.0
 typing-inspection==0.4.2
