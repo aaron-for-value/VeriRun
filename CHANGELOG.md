@@ -4,6 +4,8 @@ All notable VeriRun changes are documented here. The project follows [Semantic V
 
 ## Unreleased
 
+## [0.1.0] - 2026-08-16
+
 ### Added
 
 - Immutable v0.1 manifest, attempt, artifact, verification, and replay records.
