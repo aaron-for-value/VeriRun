@@ -3,7 +3,7 @@
 **Evidence-first infrastructure for reproducible, isolated executable evaluation and online rewards.**
 
 > [!IMPORTANT]
-> VeriRun is pre-alpha. The v0.1 protocol baseline is runnable for trusted fixtures and is still under release verification. The local executor is not a security boundary: do not use it for model-generated or otherwise untrusted code.
+> VeriRun is pre-alpha. v0.1.0 is released for trusted fixtures. The local executor is not a security boundary: do not use it for model-generated or otherwise untrusted code.
 
 VeriRun is a distributed runtime for code and agent evaluation workloads whose results must be reproducible, recoverable, attributable, and safe enough for the declared threat model. It is designed to run versioned benchmarks, preserve complete execution lineage, separate model failures from infrastructure failures, and expose the same verifier path to asynchronous post-training reward loops.
 
@@ -74,7 +74,7 @@ The control plane owns intent and durable state. The execution plane performs re
 
 | Capability | Target | Status |
 |---|---|---|
-| Immutable manifests, hashing, structured verification, deterministic replay | v0.1 | **In verification** |
+| Immutable manifests, hashing, structured verification, deterministic replay | v0.1 | **Released (v0.1.0)** |
 | Bounded async model gateway with cancellation and classified retries | v0.2 | Planned |
 | Container development backend and Kubernetes + gVisor validation backend | v0.3 | Planned |
 | Durable run state, leases, heartbeats, replay, and idempotent commit | v0.4 | Planned |
@@ -89,7 +89,7 @@ See the evidence gates and current work in the [Roadmap](ROADMAP.md).
 
 v0.1 establishes the protocol baseline before distributed infrastructure is introduced.
 
-The current release candidate provides:
+v0.1.0 provides:
 
 - a versioned `EvalManifest` contract;
 - content hashes for benchmark data, prompts, candidates, tests, and runner artifacts;
@@ -214,12 +214,12 @@ EvalPlus v0.3.1's memory `setrlimit` path is incompatible with Darwin on the cur
 
 ## v0.1 evidence
 
-The checked-in release-candidate evidence is bound to implementation revision `b30b11d2e3e1b20ad7c3b7e3df3f314ae7d6a64c`:
+The checked-in v0.1.0 release evidence is bound to implementation revision `b30b11d2e3e1b20ad7c3b7e3df3f314ae7d6a64c`:
 
 - [Synthetic protocol and replay report](evidence/v0.1/synthetic/REPORT.md) — five outcome classes, each executed twice with matching semantic replay identity.
 - [EvalPlus compatibility report](evidence/v0.1/evalplus/REPORT.md) — three HumanEval+ tasks, deterministic oracle and failure recipes, each executed twice through the official EvalPlus path.
 
-These reports prove the v0.1 development contract on the recorded macOS/Python environment. GitHub CI and the manually dispatched Linux EvalPlus workflow provide the cross-environment review gates; neither report is a model score or sandbox claim.
+These reports prove the v0.1 development contract on the recorded macOS/Python environment. GitHub CI and the [Linux EvalPlus workflow](https://github.com/aaron-for-value/VeriRun/actions/runs/31953267994) both passed; neither report is a model score or sandbox claim.
 
 ## Contributing
 

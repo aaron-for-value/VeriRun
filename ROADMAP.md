@@ -2,9 +2,9 @@
 
 This roadmap turns VeriRun from a design into an evidence-backed executable evaluation and reward runtime. It is organized by capability gates, not speculative dates.
 
-**Current stage:** v0.1 protocol baseline verification
+**Current stage:** v0.1.0 released; v0.2 planning is queued
 
-**Last updated:** 2026-07-22
+**Last updated:** 2026-08-16
 
 **Release policy:** a milestone closes only when its evidence is reproducible from the tagged revision.
 
@@ -47,7 +47,7 @@ The project reaches v1.0 only when these properties are demonstrated across supp
 | Milestone | Outcome | Status |
 |---|---|---|
 | Foundation | Public contract, governance baseline, and GitHub operating model | **Verification** |
-| v0.1 — Protocol Baseline | Reproducible verification and frozen-candidate replay | **Current** |
+| v0.1 — Protocol Baseline | Reproducible verification and frozen-candidate replay | **Complete (v0.1.0)** |
 | v0.2 — Async Model Gateway | Bounded model generation with correct failure and cancellation semantics | Queued |
 | v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | Queued |
 | v0.4 — Durable Control Plane | Recoverable runs, leases, heartbeats, replay, and idempotent result commit | Queued |
@@ -116,13 +116,13 @@ Run trusted EvalPlus fixtures through a stable protocol, preserve their lineage,
 - Every result resolves to candidate, tests, runner identity, and manifest.
 - `BENCHMARK_PROTOCOL.md`, a baseline report, and replay fixtures are published.
 
-Current release-candidate evidence:
+Release evidence:
 
 - [Synthetic protocol smoke](evidence/v0.1/synthetic/REPORT.md)
 - [EvalPlus HumanEval+ compatibility smoke](evidence/v0.1/evalplus/REPORT.md)
 - implementation revision: `b30b11d2e3e1b20ad7c3b7e3df3f314ae7d6a64c`
 
-The milestone remains in verification until required GitHub checks pass and the review branch is merged.
+v0.1.0 was released after required GitHub CI passed, PR [#7](https://github.com/aaron-for-value/VeriRun/pull/7) merged, and the [Linux EvalPlus compatibility workflow](https://github.com/aaron-for-value/VeriRun/actions/runs/31953267994) completed successfully. See the [v0.1.0 release](https://github.com/aaron-for-value/VeriRun/releases/tag/v0.1.0).
 
 ### Not in scope
 
