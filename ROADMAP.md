@@ -2,7 +2,7 @@
 
 This roadmap turns VeriRun from a design into an evidence-backed executable evaluation and reward runtime. It is organized by capability gates, not speculative dates.
 
-**Current stage:** Repository foundation
+**Current stage:** v0.1 protocol baseline verification
 
 **Last updated:** 2026-07-22
 
@@ -19,7 +19,9 @@ Each milestone defines four things:
 
 Statuses used in this document:
 
-- **Current** — active foundation work.
+- **Verification** — implementation exists; exit evidence and review are in progress.
+- **Current** — the active implementation milestone.
+- **Complete** — exit evidence is published and the milestone is closed.
 - **Queued** — accepted direction, not yet started.
 - **Optional** — pursued only after core gates and available capacity.
 - **Future** — requires evidence from earlier releases before its scope is credible.
@@ -44,8 +46,8 @@ The project reaches v1.0 only when these properties are demonstrated across supp
 
 | Milestone | Outcome | Status |
 |---|---|---|
-| Foundation | Public contract, governance baseline, and GitHub operating model | **Current** |
-| v0.1 — Protocol Baseline | Reproducible verification and frozen-candidate replay | Queued |
+| Foundation | Public contract, governance baseline, and GitHub operating model | **Verification** |
+| v0.1 — Protocol Baseline | Reproducible verification and frozen-candidate replay | **Current** |
 | v0.2 — Async Model Gateway | Bounded model generation with correct failure and cancellation semantics | Queued |
 | v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | Queued |
 | v0.4 — Durable Control Plane | Recoverable runs, leases, heartbeats, replay, and idempotent result commit | Queued |
@@ -71,8 +73,8 @@ A public repository that states what VeriRun is, what it is not, how work is acc
 - [x] Add issue forms and a pull-request template.
 - [x] Create the public GitHub repository and bind the local `origin`.
 - [ ] Configure branch protection/rulesets for `main` after the first CI workflow exists.
-- [ ] Create initial labels, milestones, and the project board.
-- [ ] Document versioning, compatibility, and release evidence policy.
+- [x] Create initial labels and milestones. The optional project board awaits GitHub Projects token scope.
+- [x] Document versioning, compatibility, and release evidence policy.
 
 ### Exit evidence
 
@@ -95,23 +97,32 @@ Run trusted EvalPlus fixtures through a stable protocol, preserve their lineage,
 
 ### Scope
 
-- Versioned `EvalManifest`, `Candidate`, `TaskAttempt`, and `VerificationResult` schemas.
-- Canonical serialization and content hashing.
-- EvalPlus adapter for versioned HumanEval+ and MBPP+ task inputs.
-- Oracle, obvious-failure, syntax-failure, and boundary-failure fixtures.
-- Executor interface with an explicitly unsafe development-only local backend.
-- Structured result classes: `passed`, `compile_error`, `test_failure`, `timeout`, `oom`, `policy_violation`, and `infra_error`.
-- Artifact layout and machine-readable replay comparison.
-- CLI for baseline verification and report generation.
+- [x] Versioned `EvalManifest`, `Candidate`, `TaskAttempt`, and `VerificationResult` schemas.
+- [x] Canonical serialization and content hashing.
+- [x] EvalPlus adapter for versioned HumanEval+ and MBPP+ task inputs.
+- [x] Oracle, obvious-failure, syntax-failure, and boundary-failure fixtures.
+- [x] Executor interface with an explicitly unsafe development-only local backend.
+- [x] Structured result classes: `passed`, `compile_error`, `test_failure`, `timeout`, `oom`, `policy_violation`, and `infra_error`.
+- [x] Artifact layout and machine-readable replay comparison.
+- [x] CLI for baseline verification and report generation.
 
 ### Exit evidence
 
 - Schema, hash, split/protocol, timeout, and result-classification tests pass in CI.
 - A frozen smoke subset replays twice with deterministic semantic results.
-- HumanEval+ and MBPP+ runs use recorded dataset version/hash and standard protocol.
+- The labeled HumanEval+ compatibility subset records package, dataset, subset, candidate, and verifier identity without presenting a standard score.
+- MBPP+ adapter compatibility is versioned, but an MBPP+ execution claim requires separate published evidence.
 - Raw and Plus test differences are reported without mislabeling subset results as full benchmark scores.
 - Every result resolves to candidate, tests, runner identity, and manifest.
 - `BENCHMARK_PROTOCOL.md`, a baseline report, and replay fixtures are published.
+
+Current release-candidate evidence:
+
+- [Synthetic protocol smoke](evidence/v0.1/synthetic/REPORT.md)
+- [EvalPlus HumanEval+ compatibility smoke](evidence/v0.1/evalplus/REPORT.md)
+- implementation revision: `b30b11d2e3e1b20ad7c3b7e3df3f314ae7d6a64c`
+
+The milestone remains in verification until required GitHub checks pass and the review branch is merged.
 
 ### Not in scope
 
@@ -485,20 +496,18 @@ Every release should include:
 - upgrade or migration notes;
 - benchmark protocol details for any reported score.
 
-## Immediate next issues
+## Active issue map
 
-Once the remote repository exists, Foundation should start with these independently reviewable issues:
+The initial independently reviewable GitHub issues are:
 
-1. Choose the license and document the rationale.
-2. Add contribution, conduct, and private security-reporting policies.
-3. Add issue forms and the pull-request template.
-4. Create labels, milestones, and the project board.
-5. Define the Python 3.12 development environment and lock strategy.
-6. Draft the v0.1 protocol schemas and canonical hashing ADR.
-7. Pin the first EvalPlus version and record the compatibility entry.
-8. Define v0.1 artifact layout and replay acceptance fixtures.
-9. Add the initial GitHub Actions quality gate.
-10. Publish the first architecture decision index.
+1. [#1 — Complete GitHub repository foundation](https://github.com/aaron-for-value/VeriRun/issues/1)
+2. [#2 — Define v0.1 protocol schemas and canonical hashing](https://github.com/aaron-for-value/VeriRun/issues/2)
+3. [#3 — Pin EvalPlus and publish v0.1 compatibility](https://github.com/aaron-for-value/VeriRun/issues/3)
+4. [#4 — Implement v0.1 executor boundary and structured verification](https://github.com/aaron-for-value/VeriRun/issues/4)
+5. [#5 — Implement content-addressed artifacts and verify/replay/report CLI](https://github.com/aaron-for-value/VeriRun/issues/5)
+6. [#6 — Add v0.1 CI and publish baseline replay evidence](https://github.com/aaron-for-value/VeriRun/issues/6)
+
+Implementation remains in `Verification` until the linked pull request reproduces the milestone evidence in CI.
 
 ## Scope reduction order
 

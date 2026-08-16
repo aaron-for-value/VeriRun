@@ -1,0 +1,207 @@
+{
+  "$defs": {
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 1,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "relative_path": {
+          "minLength": 1,
+          "title": "Relative Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "sha256",
+        "size_bytes",
+        "media_type",
+        "relative_path"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "AttemptState": {
+      "enum": [
+        "running",
+        "finished"
+      ],
+      "title": "AttemptState",
+      "type": "string"
+    },
+    "TaskAttempt": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": {
+          "minLength": 1,
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "candidate_id": {
+          "minLength": 1,
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "finished_at": {
+          "format": "date-time",
+          "title": "Finished At",
+          "type": "string"
+        },
+        "run_id": {
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "started_at": {
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/AttemptState"
+        },
+        "task_id": {
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "attempt_id",
+        "run_id",
+        "task_id",
+        "candidate_id",
+        "state",
+        "started_at",
+        "finished_at"
+      ],
+      "title": "TaskAttempt",
+      "type": "object"
+    },
+    "VerificationStatus": {
+      "enum": [
+        "passed",
+        "compile_error",
+        "test_failure",
+        "timeout",
+        "oom",
+        "policy_violation",
+        "infra_error"
+      ],
+      "title": "VerificationStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "attempt": {
+      "$ref": "#/$defs/TaskAttempt"
+    },
+    "candidate_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Candidate Hash",
+      "type": "string"
+    },
+    "duration_ms": {
+      "minimum": 0,
+      "title": "Duration Ms",
+      "type": "integer"
+    },
+    "error_class": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Class"
+    },
+    "error_message": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Message"
+    },
+    "exit_code": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Exit Code"
+    },
+    "output_truncated": {
+      "default": false,
+      "title": "Output Truncated",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "verirun.verification-result/v1",
+      "default": "verirun.verification-result/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/VerificationStatus"
+    },
+    "stderr": {
+      "$ref": "#/$defs/ArtifactRef"
+    },
+    "stdout": {
+      "$ref": "#/$defs/ArtifactRef"
+    },
+    "test_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Test Hash",
+      "type": "string"
+    },
+    "verifier_version": {
+      "minLength": 1,
+      "title": "Verifier Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "attempt",
+    "status",
+    "candidate_hash",
+    "test_hash",
+    "verifier_version",
+    "duration_ms",
+    "stdout",
+    "stderr"
+  ],
+  "title": "VerificationResult",
+  "type": "object"
+}

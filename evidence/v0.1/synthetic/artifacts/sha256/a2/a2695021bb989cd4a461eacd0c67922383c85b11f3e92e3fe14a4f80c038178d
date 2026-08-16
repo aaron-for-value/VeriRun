@@ -1,0 +1,3 @@
+def never_returns() -> None:
+    while True:
+        pass

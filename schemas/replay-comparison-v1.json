@@ -1,0 +1,52 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "baseline_result_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Baseline Result Hash",
+      "type": "string"
+    },
+    "baseline_semantic_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Baseline Semantic Hash",
+      "type": "string"
+    },
+    "differing_fields": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Differing Fields",
+      "type": "array"
+    },
+    "matched": {
+      "title": "Matched",
+      "type": "boolean"
+    },
+    "replay_result_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Replay Result Hash",
+      "type": "string"
+    },
+    "replay_semantic_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Replay Semantic Hash",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "verirun.replay-comparison/v1",
+      "default": "verirun.replay-comparison/v1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "baseline_result_hash",
+    "replay_result_hash",
+    "baseline_semantic_hash",
+    "replay_semantic_hash",
+    "matched"
+  ],
+  "title": "ReplayComparison",
+  "type": "object"
+}
