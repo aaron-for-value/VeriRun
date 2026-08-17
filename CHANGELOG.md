@@ -4,6 +4,13 @@ All notable VeriRun changes are documented here. The project follows [Semantic V
 
 ## Unreleased
 
+## [0.2.0] - 2026-08-17
+
+### Added
+
+- Bounded OpenAI-compatible async generation gateway with independent concurrency, QPS,
+  and in-flight-token admission controls.
+
 ## [0.1.0] - 2026-08-16
 
 ### Added

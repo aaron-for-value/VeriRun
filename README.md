@@ -75,7 +75,7 @@ The control plane owns intent and durable state. The execution plane performs re
 | Capability | Target | Status |
 |---|---|---|
 | Immutable manifests, hashing, structured verification, deterministic replay | v0.1 | **Released (v0.1.0)** |
-| Bounded async model gateway with cancellation and classified retries | v0.2 | Planned |
+| Bounded async model gateway with cancellation and classified retries | v0.2 | Release candidate (`0.2.0`) |
 | Container development backend and Kubernetes + gVisor validation backend | v0.3 | Planned |
 | Durable run state, leases, heartbeats, replay, and idempotent commit | v0.4 | Planned |
 | Ray/KubeRay execution with bounded in-flight work and failure recovery | v0.5 | Planned |
@@ -101,6 +101,24 @@ v0.1.0 provides:
 - a CLI that produces artifacts without requiring a model endpoint.
 
 A small frozen subset will be used for development smoke tests. Any published HumanEval+ or MBPP+ benchmark claim will require the standard versioned workload and protocol; subset results will be labeled as subset results.
+
+## v0.2: async generation gateway
+
+v0.2 adds a bounded OpenAI-compatible candidate-generation gateway. It keeps
+concurrency, QPS, and in-flight token limits separate, uses a long-lived async HTTP
+connection pool, and records classified retry history. It is not a model-provider
+performance or exactly-once generation claim.
+
+Run the local deterministic fault exercise without credentials:
+
+```bash
+./.venv/bin/python -m verirun gateway-smoke --output evidence/v0.2/gateway-smoke
+```
+
+The command covers 429, 5xx, slow response, disconnect, malformed JSON, bounded
+backpressure, and a directional local submission comparison. The test suite also
+checks cancellation cleanup. See [the async gateway contract](docs/ASYNC_GATEWAY.md)
+for policy boundaries.
 
 ## Workloads
 

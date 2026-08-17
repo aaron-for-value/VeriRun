@@ -1,0 +1,113 @@
+{
+  "$defs": {
+    "GenerationSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "max_tokens": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Max Tokens",
+          "type": "integer"
+        },
+        "n": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "N",
+          "type": "integer"
+        },
+        "seed": {
+          "default": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "temperature": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Temperature",
+          "type": "number"
+        },
+        "top_p": {
+          "default": 1.0,
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Top P",
+          "type": "number"
+        }
+      },
+      "title": "GenerationSpec",
+      "type": "object"
+    },
+    "ModelSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "endpoint_type": {
+          "minLength": 1,
+          "title": "Endpoint Type",
+          "type": "string"
+        },
+        "model_revision": {
+          "minLength": 1,
+          "title": "Model Revision",
+          "type": "string"
+        },
+        "tokenizer_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokenizer Revision"
+        }
+      },
+      "required": [
+        "endpoint_type",
+        "model_revision"
+      ],
+      "title": "ModelSpec",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One candidate-generation request; prompts are never placed in reports.",
+  "properties": {
+    "generation": {
+      "$ref": "#/$defs/GenerationSpec",
+      "default": {
+        "max_tokens": 1,
+        "n": 1,
+        "seed": 0,
+        "temperature": 0.0,
+        "top_p": 1.0
+      }
+    },
+    "model": {
+      "$ref": "#/$defs/ModelSpec"
+    },
+    "prompt": {
+      "title": "Prompt",
+      "type": "string"
+    },
+    "request_id": {
+      "minLength": 1,
+      "title": "Request Id",
+      "type": "string"
+    },
+    "task_id": {
+      "minLength": 1,
+      "title": "Task Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "request_id",
+    "task_id",
+    "prompt",
+    "model"
+  ],
+  "title": "GenerationRequest",
+  "type": "object"
+}

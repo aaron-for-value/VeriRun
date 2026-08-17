@@ -1,0 +1,107 @@
+{
+  "$defs": {
+    "GatewayErrorClass": {
+      "description": "Stable, root-cause-preserving model gateway failure classes.",
+      "enum": [
+        "rate_limited",
+        "server_error",
+        "timeout",
+        "transport",
+        "malformed_response",
+        "client_error"
+      ],
+      "title": "GatewayErrorClass",
+      "type": "string"
+    },
+    "GenerationStatus": {
+      "description": "Terminal state of one model-generation request.",
+      "enum": [
+        "succeeded",
+        "failed"
+      ],
+      "title": "GenerationStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Structured outcome of a model call, independent from later verification.",
+  "properties": {
+    "attempt_error_classes": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/GatewayErrorClass"
+      },
+      "title": "Attempt Error Classes",
+      "type": "array"
+    },
+    "attempts": {
+      "minimum": 1,
+      "title": "Attempts",
+      "type": "integer"
+    },
+    "completion_texts": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Completion Texts",
+      "type": "array"
+    },
+    "error_class": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GatewayErrorClass"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "error_message": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Message"
+    },
+    "latency_ms": {
+      "minimum": 0,
+      "title": "Latency Ms",
+      "type": "integer"
+    },
+    "request_id": {
+      "minLength": 1,
+      "title": "Request Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "verirun.generation-result/v1",
+      "default": "verirun.generation-result/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/GenerationStatus"
+    },
+    "task_id": {
+      "minLength": 1,
+      "title": "Task Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "request_id",
+    "task_id",
+    "status",
+    "attempts",
+    "latency_ms"
+  ],
+  "title": "GenerationResult",
+  "type": "object"
+}

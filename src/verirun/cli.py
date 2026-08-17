@@ -1,4 +1,4 @@
-"""VeriRun v0.1 command-line interface."""
+"""VeriRun command-line interface."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ from verirun.evalplus_smoke import (
 )
 from verirun.executor import LocalExecutor
 from verirun.fixtures import SmokeCase, build_smoke_manifest
+from verirun.gateway_smoke import gateway_smoke_succeeded, run_gateway_smoke
 from verirun.models import EvalManifest, VerificationResult, VerificationStatus
 from verirun.replay import compare_results
 from verirun.smoke import run_smoke, smoke_succeeded
@@ -88,6 +89,16 @@ def _evalplus_smoke(args: argparse.Namespace) -> int:
     return 0 if evalplus_smoke_succeeded(summary) else 5
 
 
+def _gateway_smoke(args: argparse.Namespace) -> int:
+    summary = run_gateway_smoke(args.output)
+    backpressure = summary["backpressure"]
+    print(
+        f"gateway_smoke_succeeded={str(gateway_smoke_succeeded(summary)).lower()} "
+        f"max_active={backpressure['max_fake_server_active_requests']}"
+    )
+    return 0 if gateway_smoke_succeeded(summary) else 6
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="verirun")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -107,6 +118,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     evalplus_smoke.add_argument("--output", type=Path, default=Path("evidence/v0.1/evalplus"))
     evalplus_smoke.set_defaults(handler=_evalplus_smoke)
+
+    gateway_smoke = subparsers.add_parser(
+        "gateway-smoke", help="run v0.2 local fake-server gateway fault scenarios"
+    )
+    gateway_smoke.add_argument("--output", type=Path, default=Path("evidence/v0.2/gateway-smoke"))
+    gateway_smoke.set_defaults(handler=_gateway_smoke)
 
     verify = subparsers.add_parser("verify", help="verify one trusted Python candidate")
     verify.add_argument("--candidate", type=Path, required=True)

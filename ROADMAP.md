@@ -139,20 +139,20 @@ Generate candidates through an OpenAI-compatible endpoint with bounded resource 
 
 ### Scope
 
-- Async HTTP connection pooling.
-- Separate concurrency, QPS, and token-budget controls.
-- Bounded producer/consumer queues rather than unbounded task creation.
-- Layered timeouts and structured cancellation.
-- Error classification and retry budgets with jitter.
-- Fake server scenarios for 429, 5xx, slow response, disconnect, and malformed JSON.
-- Candidate generation replay boundary independent from verification replay.
+- [x] Async HTTP connection pooling.
+- [x] Separate concurrency, QPS, and token-budget controls.
+- [x] Bounded producer/consumer queues rather than unbounded task creation.
+- [x] Layered timeouts and structured cancellation.
+- [x] Error classification and retry budgets with jitter.
+- [x] Fake server scenarios for 429, 5xx, slow response, disconnect, and malformed JSON.
+- [x] Candidate generation replay boundary independent from verification replay.
 
 ### Exit evidence
 
-- Tests cover fail-fast behavior, partial failure, parent cancellation, timeout cleanup, and backpressure.
-- Cancellation leaves no hanging task, connection, or child process.
-- Sequential, unbounded, and bounded implementations are compared with throughput, memory, and P95 evidence.
-- Retry amplification and root-cause preservation are reported.
+- [x] Tests cover fail-fast behavior, partial failure, parent cancellation, timeout cleanup, and backpressure.
+- [x] Cancellation leaves no hanging internal task or client connection; v0.2 creates no child process.
+- [x] Sequential, eager-task, and bounded-worker submission are compared with throughput, traced memory, and admitted-request P95 evidence.
+- [x] Retry amplification and root-cause preservation are reported.
 
 ### Not in scope
 
