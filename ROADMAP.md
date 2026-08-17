@@ -154,6 +154,15 @@ Generate candidates through an OpenAI-compatible endpoint with bounded resource 
 - [x] Sequential, eager-task, and bounded-worker submission are compared with throughput, traced memory, and admitted-request P95 evidence.
 - [x] Retry amplification and root-cause preservation are reported.
 
+Release evidence:
+
+- [Local async gateway smoke report](evidence/v0.2/gateway-smoke/REPORT.md)
+- implementation revision: `d6021141fd6bdff6c6366fa7a0b593f612146354`
+
+v0.2.0 was released after PR [#17](https://github.com/aaron-for-value/VeriRun/pull/17)
+merged and GitHub Actions `quality` passed. See the
+[v0.2.0 release](https://github.com/aaron-for-value/VeriRun/releases/tag/v0.2.0).
+
 ### Not in scope
 
 - Provider-specific orchestration beyond the OpenAI-compatible contract.

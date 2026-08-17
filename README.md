@@ -75,7 +75,7 @@ The control plane owns intent and durable state. The execution plane performs re
 | Capability | Target | Status |
 |---|---|---|
 | Immutable manifests, hashing, structured verification, deterministic replay | v0.1 | **Released (v0.1.0)** |
-| Bounded async model gateway with cancellation and classified retries | v0.2 | Release candidate (`0.2.0`) |
+| Bounded async model gateway with cancellation and classified retries | v0.2 | **Released (v0.2.0)** |
 | Container development backend and Kubernetes + gVisor validation backend | v0.3 | Planned |
 | Durable run state, leases, heartbeats, replay, and idempotent commit | v0.4 | Planned |
 | Ray/KubeRay execution with bounded in-flight work and failure recovery | v0.5 | Planned |
@@ -119,6 +119,10 @@ The command covers 429, 5xx, slow response, disconnect, malformed JSON, bounded
 backpressure, and a directional local submission comparison. The test suite also
 checks cancellation cleanup. See [the async gateway contract](docs/ASYNC_GATEWAY.md)
 for policy boundaries.
+
+The [v0.2.0 release](https://github.com/aaron-for-value/VeriRun/releases/tag/v0.2.0)
+includes the local fault evidence and versioned gateway schemas. It does not add a
+provider-compatibility, model-quality, or exactly-once generation claim.
 
 ## Workloads
 
