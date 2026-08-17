@@ -1,5 +1,13 @@
 """VeriRun protocol and execution runtime."""
 
+from verirun.gateway import (
+    AsyncModelGateway,
+    GatewayConfig,
+    GatewayErrorClass,
+    GenerationRequest,
+    GenerationResult,
+    GenerationStatus,
+)
 from verirun.models import (
     ArtifactRef,
     BenchmarkSpec,
@@ -17,11 +25,17 @@ from verirun.models import (
 
 __all__ = [
     "ArtifactRef",
+    "AsyncModelGateway",
     "BenchmarkSpec",
     "Candidate",
     "EvalManifest",
     "ExecutionSpec",
+    "GatewayConfig",
+    "GatewayErrorClass",
+    "GenerationRequest",
+    "GenerationResult",
     "GenerationSpec",
+    "GenerationStatus",
     "ModelSpec",
     "ReplayComparison",
     "TaskAttempt",
@@ -30,4 +44,4 @@ __all__ = [
     "VerifierSpec",
 ]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0.dev0"

@@ -1,4 +1,4 @@
-"""Export or verify the public v0.1 JSON Schemas."""
+"""Export or verify the public JSON Schemas."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from verirun.adapters.evalplus import EvalPlusTaskResult
+from verirun.gateway import GatewayConfig, GenerationRequest, GenerationResult
 from verirun.models import EvalManifest, ReplayComparison, VerificationResult
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,6 +17,9 @@ SCHEMA_DIRECTORY = ROOT / "schemas"
 MODELS: dict[str, type[BaseModel]] = {
     "eval-manifest-v1.json": EvalManifest,
     "evalplus-task-result-v1.json": EvalPlusTaskResult,
+    "gateway-config-v1.json": GatewayConfig,
+    "generation-request-v1.json": GenerationRequest,
+    "generation-result-v1.json": GenerationResult,
     "replay-comparison-v1.json": ReplayComparison,
     "verification-result-v1.json": VerificationResult,
 }

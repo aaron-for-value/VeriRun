@@ -1,0 +1,82 @@
+{
+  "additionalProperties": false,
+  "description": "Non-secret resource and retry policy for one model endpoint.",
+  "properties": {
+    "base_url": {
+      "minLength": 1,
+      "title": "Base Url",
+      "type": "string"
+    },
+    "connect_timeout_seconds": {
+      "default": 5.0,
+      "exclusiveMinimum": 0,
+      "title": "Connect Timeout Seconds",
+      "type": "number"
+    },
+    "max_attempts": {
+      "default": 3,
+      "exclusiveMinimum": 0,
+      "title": "Max Attempts",
+      "type": "integer"
+    },
+    "max_concurrency": {
+      "default": 4,
+      "exclusiveMinimum": 0,
+      "title": "Max Concurrency",
+      "type": "integer"
+    },
+    "max_in_flight_tokens": {
+      "default": 4096,
+      "exclusiveMinimum": 0,
+      "title": "Max In Flight Tokens",
+      "type": "integer"
+    },
+    "pool_timeout_seconds": {
+      "default": 5.0,
+      "exclusiveMinimum": 0,
+      "title": "Pool Timeout Seconds",
+      "type": "number"
+    },
+    "queue_capacity": {
+      "default": 16,
+      "exclusiveMinimum": 0,
+      "title": "Queue Capacity",
+      "type": "integer"
+    },
+    "read_timeout_seconds": {
+      "default": 30.0,
+      "exclusiveMinimum": 0,
+      "title": "Read Timeout Seconds",
+      "type": "number"
+    },
+    "requests_per_second": {
+      "default": 4.0,
+      "exclusiveMinimum": 0,
+      "title": "Requests Per Second",
+      "type": "number"
+    },
+    "retry_base_delay_seconds": {
+      "default": 0.25,
+      "minimum": 0,
+      "title": "Retry Base Delay Seconds",
+      "type": "number"
+    },
+    "retry_max_delay_seconds": {
+      "default": 5.0,
+      "minimum": 0,
+      "title": "Retry Max Delay Seconds",
+      "type": "number"
+    },
+    "write_timeout_seconds": {
+      "default": 10.0,
+      "exclusiveMinimum": 0,
+      "title": "Write Timeout Seconds",
+      "type": "number"
+    }
+  },
+  "required": [
+    "base_url"
+  ],
+  "title": "GatewayConfig",
+  "type": "object"
+}
