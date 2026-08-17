@@ -5,7 +5,7 @@
 
 - Python: `3.12.13`
 - Platform: `macOS-26.5.2-arm64-arm-64bit`
-- Source revision: `d1da6a2c56dc6e5d03569da054cd3d4c8f394cc6`
+- Source revision: `d6021141fd6bdff6c6366fa7a0b593f612146354`
 - Working tree clean at start: `True`
 
 | Scenario | Evidence |
@@ -25,9 +25,9 @@ P95 is from admitted HTTP requests; it excludes time waiting in the bounded queu
 
 | Submission mode | Duration (ms) | Throughput (req/s) | Admitted P95 (ms) | Peak traced memory (bytes) |
 |---|---:|---:|---:|---:|
-| sequential | 307 | 78.07 | 13 | 450015 |
-| eager_tasks | 87 | 274.6 | 86 | 558723 |
-| bounded_workers | 87 | 273.53 | 15 | 550922 |
+| sequential | 302 | 79.46 | 12 | 447415 |
+| eager_tasks | 85 | 279.8 | 84 | 551875 |
+| bounded_workers | 78 | 306.44 | 14 | 549085 |
 
 ## Limitations
 
