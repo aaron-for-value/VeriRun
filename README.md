@@ -3,7 +3,9 @@
 **Evidence-first infrastructure for reproducible, isolated executable evaluation and online rewards.**
 
 > [!IMPORTANT]
-> VeriRun is pre-alpha. v0.1.0 is released for trusted fixtures. The local executor is not a security boundary: do not use it for model-generated or otherwise untrusted code.
+> VeriRun is pre-alpha. **The latest release is [v0.2.0](https://github.com/aaron-for-value/VeriRun/releases/tag/v0.2.0): a bounded async model gateway.**
+> v0.1's local executor remains for trusted fixtures only and is not a security boundary;
+> do not use it for model-generated or otherwise untrusted code.
 
 VeriRun is a distributed runtime for code and agent evaluation workloads whose results must be reproducible, recoverable, attributable, and safe enough for the declared threat model. It is designed to run versioned benchmarks, preserve complete execution lineage, separate model failures from infrastructure failures, and expose the same verifier path to asynchronous post-training reward loops.
 
@@ -85,9 +87,9 @@ The control plane owns intent and durable state. The execution plane performs re
 
 See the evidence gates and current work in the [Roadmap](ROADMAP.md).
 
-## First usable release: v0.1
+## v0.1 protocol foundation
 
-v0.1 establishes the protocol baseline before distributed infrastructure is introduced.
+v0.1.0 established the protocol baseline before distributed infrastructure was introduced.
 
 v0.1.0 provides:
 
