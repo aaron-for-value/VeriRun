@@ -104,6 +104,18 @@ v0.1.0 provides:
 
 A small frozen subset will be used for development smoke tests. Any published HumanEval+ or MBPP+ benchmark claim will require the standard versioned workload and protocol; subset results will be labeled as subset results.
 
+## M0 complete-workload evidence
+
+The post-v0.1 M0 addendum exercises the full HumanEval+ and MBPP+ ordered workloads
+with deterministic canonical and obvious-failure fixtures, Base/Plus split reporting,
+two replays, and five Plus-only boundary catches. It is verifier/replay evidence, not
+a model score or a new v0.1.0 release claim. See the [M0 evidence guide](docs/M0_EVALPLUS_EVIDENCE.md)
+and its generated [task-level report](evidence/m0/evalplus/REPORT.md).
+
+The full gate is manually reproducible in GitHub Actions through **EvalPlus M0 full
+workload**. It must be regenerated from a clean revision before it is presented as
+merged or release evidence.
+
 ## v0.2: async generation gateway
 
 v0.2 adds a bounded OpenAI-compatible candidate-generation gateway. It keeps

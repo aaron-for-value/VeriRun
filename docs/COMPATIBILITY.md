@@ -10,7 +10,7 @@ VeriRun records exact versions in evidence artifacts. This document lists suppor
 | Pydantic | >=2.10,<3 | Supported | Core protocol runtime dependency. |
 | EvalPlus | v0.3.1 | Adapter target | Tag commit `e5d0ed0bab96280b60b637ec7f15b5e4841b0cb2`. |
 | HumanEval+ dataset | v0.1.10 + runtime API MD5 | Evidence-bound | Exact algorithm-qualified hash is captured from `get_human_eval_plus_hash`. |
-| MBPP+ dataset | v0.2.0 + runtime API MD5 | Adapter target | Exact algorithm-qualified hash is captured from `get_mbpp_plus_hash`; no v0.1 MBPP+ smoke claim is published. |
+| MBPP+ dataset | v0.2.0 + runtime API MD5 | Evidence-bound | Exact algorithm-qualified hash is captured from `get_mbpp_plus_hash`; full M0 evidence covers the ordered 378-task workload. |
 | Local executor | `trusted-fixtures-only` | Development only | Not a security boundary. |
 | macOS arm64 | Local development | Supported for protocol work | Not valid gVisor security evidence. |
 | Linux | Planned validation | Not yet evidenced | Required for later sandbox work. |
@@ -35,3 +35,4 @@ VeriRun records exact versions in evidence artifacts. This document lists suppor
 - Artifact storage is local and content-addressed; remote object storage is deferred.
 - Result authenticity and signing are not implemented.
 - The supported workload smoke is a labeled subset, not a leaderboard score.
+- The full M0 fixture evidence is documented separately in `docs/M0_EVALPLUS_EVIDENCE.md`; it remains reproducibility evidence for deterministic candidates, not a model-quality claim.

@@ -111,6 +111,22 @@ The trusted synthetic suite includes:
 
 Each case runs twice. The report must show both expected status agreement and semantic replay agreement. This suite validates VeriRun protocol behavior; it is not an EvalPlus score.
 
+## M0 full-workload fixture evidence
+
+The post-v0.1 M0 addendum runs the complete pinned HumanEval+ and MBPP+ task lists
+with canonical-source and obvious-failure fixtures. It records Base and Plus pass
+counts independently, runs every candidate twice, and includes five fixed
+Base-pass/Plus-fail fixtures whose selected Plus-only input is represented by a hash.
+
+The full workload must not silently exclude a task. `HumanEval/32` is retained as a
+versioned canonical-reference exception because its pinned canonical source fails the
+EvalPlus `find_zero` residual verifier in both phases. Its source, Base/Plus statuses,
+and replay records remain in the task-level evidence; aggregate output must show the
+result rather than converting it into a pass or removing it from the denominator.
+
+`docs/M0_EVALPLUS_EVIDENCE.md` defines the public command, partial-run resume
+contract, evidence layout, and clean-revision publishing rule.
+
 ## Publishing rules
 
 Any published benchmark conclusion must include:

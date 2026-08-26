@@ -1,0 +1,32 @@
+name: EvalPlus M0 full workload
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-workload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install locked EvalPlus environment
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements/evalplus-v0.1.lock.txt
+          python -m pip install --disable-pip-version-check -e . --no-deps
+      - name: Reproduce full M0 evidence
+        run: python -m verirun evalplus-m0 --output evidence/m0/evalplus
+      - name: Upload M0 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verirun-m0-evalplus
+          path: evidence/m0/evalplus
+          if-no-files-found: error
+          retention-days: 30

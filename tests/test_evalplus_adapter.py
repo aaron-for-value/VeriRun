@@ -53,6 +53,14 @@ def test_load_subset_qualifies_upstream_md5(monkeypatch: pytest.MonkeyPatch) -> 
     assert subset.dataset_release == "v0.1.10"
 
 
+def test_standard_task_ids_preserves_pinned_upstream_order(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(evalplus, "_load_api", fake_api)
+
+    assert evalplus.standard_task_ids("humaneval") == ("HumanEval/0",)
+
+
 @pytest.mark.parametrize(
     ("base", "plus", "expected"),
     [

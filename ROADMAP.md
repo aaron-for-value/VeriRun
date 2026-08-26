@@ -4,7 +4,7 @@ This roadmap turns VeriRun from a design into an evidence-backed executable eval
 
 **Current stage:** v0.2.0 released; v0.3 Isolated Execution is queued
 
-**Last updated:** 2026-08-18
+**Last updated:** 2026-08-21
 
 **Release policy:** a milestone closes only when its evidence is reproducible from the tagged revision.
 
@@ -35,8 +35,8 @@ Given an immutable evaluation or reward manifest, VeriRun should be able to:
 1. generate or ingest candidates under bounded concurrency;
 2. run untrusted verification in the declared isolation environment;
 3. preserve every attempt and commit exactly one final result;
-4. resume or replay without silently changing model or verifier inputs;
-5. trace results to benchmark, prompt, candidate, tests, image, policy, and artifacts;
+4. resume or replay without silently changing model, verifier, evidence, or aggregation-policy inputs;
+5. trace results to benchmark, prompt, candidate, tests, image, frozen verification plan, policy, and artifacts;
 6. distinguish capability failures from infrastructure failures;
 7. expose the same verifier path to asynchronous training reward clients.
 
@@ -50,7 +50,7 @@ The project reaches v1.0 only when these properties are demonstrated across supp
 | v0.1 — Protocol Baseline | Reproducible verification and frozen-candidate replay | **Complete (v0.1.0)** |
 | v0.2 — Async Model Gateway | Bounded model generation with correct failure and cancellation semantics | **Complete (v0.2.0)** |
 | v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | Queued |
-| v0.4 — Durable Control Plane | Recoverable runs, leases, heartbeats, replay, and idempotent result commit | Queued |
+| v0.4 — Durable Control Plane | Recoverable runs with frozen verification plans, comparable cohorts, leases, heartbeats, replay, and idempotent result commit | Queued |
 | v0.5 — Distributed Executor | Bounded Ray/KubeRay execution with failure recovery | Queued |
 | v0.6 — Reliability & Evaluation Evidence | Correlated observability, capacity/chaos reports, and valid statistics | Queued |
 | v0.7 — Reward Runtime | Stable asynchronous verifier rewards for veRL | Queued |
@@ -123,6 +123,36 @@ Release evidence:
 - implementation revision: `b30b11d2e3e1b20ad7c3b7e3df3f314ae7d6a64c`
 
 v0.1.0 was released after required GitHub CI passed, PR [#7](https://github.com/aaron-for-value/VeriRun/pull/7) merged, and the [Linux EvalPlus compatibility workflow](https://github.com/aaron-for-value/VeriRun/actions/runs/31953267994) completed successfully. See the [v0.1.0 release](https://github.com/aaron-for-value/VeriRun/releases/tag/v0.1.0).
+
+### M0 full-workload evidence addendum
+
+This is post-v0.1 supporting evidence. It does not retroactively expand the
+v0.1.0 release claim or turn fixture results into a benchmark score.
+
+Scope:
+
+- Run the complete pinned EvalPlus HumanEval+ and MBPP+ selections with
+  deterministic oracle, obvious-failure, and Plus-only boundary fixtures.
+- Preserve raw, source-free result pairs, an immutable manifest, fixture
+  digests, environment identity, and baseline/replay comparisons.
+- Demonstrate at least five Plus-only boundary catches, while retaining and
+  disclosing any canonical-reference exception instead of replacing it with a
+  custom solution.
+
+Publication gate:
+
+- Reproduce the full selection from a clean revision and publish the manifest
+  checksum, summary, and raw evidence under
+  [`evidence/m0/evalplus/`](evidence/m0/evalplus/).
+- Keep the full-workload result labeled as fixture/reproducibility evidence,
+  not as a model-quality, security, or standard benchmark claim.
+- Provide a manually dispatched Linux workflow and an operator guide for the
+  required EvalPlus environment and the review path for known exceptions.
+
+Local preflight artifacts and the exact rerun command are documented in
+[`docs/M0_EVALPLUS_EVIDENCE.md`](docs/M0_EVALPLUS_EVIDENCE.md). A clean-revision
+report is required before this addendum is cited in a merged release or public
+announcement.
 
 ### Not in scope
 
@@ -202,32 +232,40 @@ Run untrusted candidates through explicit execution tiers and publish security e
 
 ### Outcome
 
-Create, inspect, cancel, resume, and replay evaluation runs that survive process failure without duplicate final results.
+Create, inspect, cancel, resume, and replay evaluation runs that survive process failure without duplicate final results or silently changing their verification contract. A comparison cohort uses one frozen verification plan before its candidates are scheduled.
 
 ### Scope
 
 - Typed API and CLI commands for run lifecycle operations.
 - PostgreSQL-backed `EvalRun`, task, attempt, result, and artifact metadata.
 - Immutable commands and explicit run state transitions.
+- A versioned `VerificationPlan` registry with the lifecycle `draft → validated → frozen → superseded / invalid`; only a frozen plan is schedulable.
+- A deterministic plan compiler whose inputs are `TaskSpec`, evaluation intent, verifier catalog, policy revision, and input-evidence digests. Candidate contents, model identity, and already-produced evaluation output are not plan-selection inputs.
+- Frozen verifier graph, verifier/config/image digests, required evidence, aggregation policy, budget estimate, and comparison-cohort identity recorded by each plan.
+- `TaskAttempt`, `VerificationResult`, and reports reference `verification_plan_id` and `verification_plan_digest`.
 - Queue claim, lease, heartbeat, expiry, and reclaim semantics.
-- Caller-provided idempotency keys and same-key/different-intent rejection.
+- Caller-provided command idempotency keys with same-key/different-intent rejection; final-result uniqueness keyed by `run_id + task_id + candidate_id + verification_plan_digest`.
 - Content-addressed artifacts in an S3-compatible store.
-- Budget estimation and admission inputs.
+- Plan preflight that requires one plan digest per comparison cohort, automatically splits a cohort when the plan, verifier image, required evidence, or aggregation policy changes, and rejects mixed aggregation.
+- Budget estimation and admission inputs derived from candidate count and the frozen verifier graph's expected model tokens, sandbox CPU time, and maximum concurrency.
 
 ### Exit evidence
 
 - Restarting the control plane does not lose authoritative run state.
-- Killing a worker causes safe task takeover.
+- Killing a worker causes safe task takeover under the same frozen verification plan.
 - Repeated final commits produce one authoritative result.
 - Late arrivals and same-key/different-payload requests are tested.
-- Model, user code, verifier, sandbox, scheduler, and storage failures remain distinguishable.
-- An architecture document and recovery demo are published.
+- Only validated, frozen plans can be claimed; invalid or superseded plans cannot enter scheduling.
+- A comparison cohort's candidates all reference the same `verification_plan_digest`; a changed plan, verifier image, required-evidence policy, or aggregation policy produces a distinct cohort that cannot be co-aggregated.
+- Plan/preflight, model, user-code, verifier, sandbox, scheduler, and storage failures remain distinguishable.
+- An architecture document, plan schema and lifecycle ADR, recovery demo, and plan-consistency test are published.
 
 ### Not in scope
 
 - Kafka or Temporal introduced only to avoid defining state semantics.
 - Exactly-once execution claims.
 - Dashboard-first development.
+- LLM-routed planning, multi-agent verifier orchestration, or candidate-adaptive verifier selection. Those are validity hypotheses, not M3 capabilities.
 
 ## v0.5 — Distributed Executor
 
@@ -239,6 +277,7 @@ Run the same manifest locally and through KubeRay while keeping work bounded and
 
 - Ray Data for versioned dataset ingestion, normalization, and sharding.
 - Ray Core for stateful orchestration and task/actor execution.
+- Every local or Ray task receives the same frozen `VerificationPlan` selected by v0.4; Ray retries and worker takeover never recompute or replace that plan.
 - Bounded in-flight scheduling with `ray.wait` or an equivalent mechanism.
 - CPU verifier, GPU inference, and external API resource pools.
 - KubeRay RayJob deployment and cleanup.
@@ -246,8 +285,8 @@ Run the same manifest locally and through KubeRay while keeping work bounded and
 
 ### Exit evidence
 
-- The same manifest runs locally and as a RayJob.
-- Worker/actor failure does not lose committed results or create duplicate final results.
+- The same manifest and frozen verification-plan digest run locally and as a RayJob.
+- Worker/actor failure does not lose committed results, create duplicate final results, or change the verification plan.
 - 1/2/4/8/16 concurrency experiments report throughput, P95, memory, spill, and recovery.
 - A Ray Data versus Ray Core ADR is published.
 - At least one component is deliberately not implemented with Ray, with rationale.

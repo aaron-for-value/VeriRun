@@ -8,6 +8,13 @@ from pathlib import Path
 
 from verirun.artifacts import ArtifactStore
 from verirun.canonical import content_hash, write_canonical_json
+from verirun.evalplus_m0 import (
+    STANDARD_DATASETS,
+    STANDARD_RECIPES,
+    m0_evalplus_selection_succeeded,
+    m0_evalplus_succeeded,
+    run_m0_evalplus,
+)
 from verirun.evalplus_smoke import (
     DEFAULT_TASK_IDS,
     evalplus_smoke_succeeded,
@@ -89,6 +96,30 @@ def _evalplus_smoke(args: argparse.Namespace) -> int:
     return 0 if evalplus_smoke_succeeded(summary) else 5
 
 
+def _evalplus_m0(args: argparse.Namespace) -> int:
+    if args.boundary_only and (args.dataset or args.recipe):
+        raise ValueError("--boundary-only cannot be combined with --dataset or --recipe")
+    datasets = tuple(args.dataset) if args.dataset else STANDARD_DATASETS
+    recipes = tuple(args.recipe) if args.recipe else STANDARD_RECIPES
+    summary = run_m0_evalplus(
+        args.output,
+        datasets=() if args.boundary_only else datasets,
+        recipes=() if args.boundary_only else recipes,
+        include_boundary=args.boundary_only or not args.skip_boundary,
+    )
+    selected_succeeded = m0_evalplus_selection_succeeded(summary)
+    print(
+        f"m0_evalplus_selection_succeeded={str(selected_succeeded).lower()} "
+        f"m0_evalplus_succeeded={str(m0_evalplus_succeeded(summary)).lower()} "
+        f"plus_boundary_catches={summary['plus_boundary_catches']} "
+        f"complete_selection={str(summary['complete_selection']).lower()}"
+    )
+    succeeded = (
+        m0_evalplus_succeeded(summary) if summary["complete_selection"] else selected_succeeded
+    )
+    return 0 if succeeded else 7
+
+
 def _gateway_smoke(args: argparse.Namespace) -> int:
     summary = run_gateway_smoke(args.output)
     backpressure = summary["backpressure"]
@@ -118,6 +149,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     evalplus_smoke.add_argument("--output", type=Path, default=Path("evidence/v0.1/evalplus"))
     evalplus_smoke.set_defaults(handler=_evalplus_smoke)
+
+    evalplus_m0 = subparsers.add_parser(
+        "evalplus-m0", help="run the complete M0 EvalPlus fixture and replay evidence"
+    )
+    evalplus_m0.add_argument("--output", type=Path, default=Path("evidence/m0/evalplus"))
+    evalplus_m0.add_argument(
+        "--dataset", choices=STANDARD_DATASETS, action="append", help="resume one dataset"
+    )
+    evalplus_m0.add_argument(
+        "--recipe", choices=STANDARD_RECIPES, action="append", help="resume one fixture recipe"
+    )
+    evalplus_m0.add_argument(
+        "--skip-boundary", action="store_true", help="omit the boundary-fixture cohort"
+    )
+    evalplus_m0.add_argument(
+        "--boundary-only", action="store_true", help="run only the five boundary fixtures"
+    )
+    evalplus_m0.set_defaults(handler=_evalplus_m0)
 
     gateway_smoke = subparsers.add_parser(
         "gateway-smoke", help="run v0.2 local fake-server gateway fault scenarios"

@@ -24,6 +24,8 @@ htmlcov/
 task_plan.md
 findings.md
 progress.md
+.codex/storyline/
+storyline-out/
 
 # Local VeriRun working state
 .verirun/

@@ -1,4 +1,4 @@
-.PHONY: build check evidence-evalplus evidence-gateway evidence-synthetic evalplus-smoke format gateway-smoke lint schemas smoke test typecheck
+.PHONY: build check evidence-evalplus evidence-evalplus-m0 evidence-gateway evidence-synthetic evalplus-m0 evalplus-smoke format gateway-smoke lint schemas smoke test typecheck
 
 PYTHON := .venv/bin/python
 
@@ -27,6 +27,9 @@ smoke:
 evalplus-smoke:
 	$(PYTHON) -m verirun evalplus-smoke --output .verirun/evidence/v0.1/evalplus
 
+evalplus-m0:
+	EVALPLUS_MAX_MEMORY_BYTES=-1 $(PYTHON) -m verirun evalplus-m0 --output .verirun/evidence/m0/evalplus
+
 gateway-smoke:
 	$(PYTHON) -m verirun gateway-smoke --output .verirun/evidence/v0.2/gateway-smoke
 
@@ -35,6 +38,9 @@ evidence-synthetic:
 
 evidence-evalplus:
 	$(PYTHON) -m verirun evalplus-smoke --output evidence/v0.1/evalplus
+
+evidence-evalplus-m0:
+	EVALPLUS_MAX_MEMORY_BYTES=-1 $(PYTHON) -m verirun evalplus-m0 --output evidence/m0/evalplus
 
 evidence-gateway:
 	$(PYTHON) -m verirun gateway-smoke --output evidence/v0.2/gateway-smoke

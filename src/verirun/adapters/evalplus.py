@@ -167,6 +167,18 @@ def load_subset(
     )
 
 
+def standard_task_ids(dataset: EvalPlusDataset) -> tuple[str, ...]:
+    """Return EvalPlus's ordered pinned workload IDs without selecting a subset."""
+
+    api = _load_api()
+    problems = (
+        api.load_humaneval(version="default")
+        if dataset == "humaneval"
+        else api.load_mbpp(version="default")
+    )
+    return tuple(problems)
+
+
 def _phase(value: object) -> EvalPlusPhaseResult:
     if not isinstance(value, (tuple, list)) or len(value) != 2:
         raise ValueError("EvalPlus returned an invalid phase result")
