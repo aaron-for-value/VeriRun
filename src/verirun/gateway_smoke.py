@@ -12,7 +12,7 @@ from contextlib import suppress
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from time import perf_counter
+from time import perf_counter, sleep
 from typing import Any
 
 from verirun.canonical import write_canonical_json
@@ -35,6 +35,54 @@ class ScriptedResponse:
     raw_body: str | None = None
     delay_seconds: float = 0.0
     disconnect: bool = False
+
+
+class EventLoopWatchdog:
+    """Measure event-loop scheduling lag during a bounded local scenario."""
+
+    def __init__(
+        self,
+        *,
+        sample_interval_seconds: float = 0.01,
+        detection_threshold_seconds: float = 0.1,
+    ) -> None:
+        self._sample_interval_seconds = sample_interval_seconds
+        self._detection_threshold_seconds = detection_threshold_seconds
+        self._heartbeat_count = 0
+        self._max_lag_seconds = 0.0
+        self._stop = asyncio.Event()
+        self._task: asyncio.Task[None] | None = None
+
+    async def start(self) -> None:
+        if self._task is not None:
+            raise RuntimeError("event-loop watchdog is already running")
+        self._task = asyncio.create_task(self._sample(), name="verirun-event-loop-watchdog")
+        await asyncio.sleep(0)
+
+    async def stop(self) -> dict[str, int | bool]:
+        if self._task is None:
+            raise RuntimeError("event-loop watchdog has not started")
+        self._stop.set()
+        await self._task
+        self._task = None
+        max_lag_ms = round(self._max_lag_seconds * 1_000)
+        threshold_ms = round(self._detection_threshold_seconds * 1_000)
+        return {
+            "heartbeat_count": self._heartbeat_count,
+            "max_lag_ms": max_lag_ms,
+            "threshold_ms": threshold_ms,
+            "block_detected": max_lag_ms >= threshold_ms,
+        }
+
+    async def _sample(self) -> None:
+        loop = asyncio.get_running_loop()
+        expected_at = loop.time() + self._sample_interval_seconds
+        while not self._stop.is_set():
+            await asyncio.sleep(max(0.0, expected_at - loop.time()))
+            observed_at = loop.time()
+            self._max_lag_seconds = max(self._max_lag_seconds, observed_at - expected_at)
+            self._heartbeat_count += 1
+            expected_at += self._sample_interval_seconds
 
 
 class ScriptedOpenAIServer:
@@ -180,8 +228,10 @@ async def _run_gateway_smoke_async() -> dict[str, Any]:
             batch = await gateway.generate_many([_request(f"batch-{index}") for index in range(6)])
             batch_duration_ms = int((perf_counter() - started_at) * 1_000)
 
+    event_loop = await _run_event_loop_evidence_async()
+
     return {
-        "schema_version": "verirun.gateway-smoke-report/v1",
+        "schema_version": "verirun.gateway-smoke-report/v2",
         "generated_at": datetime.now(UTC),
         "environment": {
             "python": platform.python_version(),
@@ -207,6 +257,57 @@ async def _run_gateway_smoke_async() -> dict[str, Any]:
             "batch_succeeded": all(result.status is GenerationStatus.SUCCEEDED for result in batch),
         },
         "request_counts": dict(sorted(server.request_counts.items())),
+        "event_loop": event_loop,
+    }
+
+
+async def _run_event_loop_evidence_async() -> dict[str, Mapping[str, int | bool | str]]:
+    """Distinguish non-blocking slow I/O from a detectable synchronous block."""
+
+    async with (
+        ScriptedOpenAIServer(
+            {
+                "slow-upstream": [ScriptedResponse(delay_seconds=0.12)],
+                "fast-during-slow": [ScriptedResponse()],
+            }
+        ) as server,
+        AsyncModelGateway(
+            GatewayConfig(
+                base_url=server.base_url,
+                max_concurrency=2,
+                requests_per_second=1_000,
+                max_in_flight_tokens=16,
+                queue_capacity=2,
+                read_timeout_seconds=0.5,
+                max_attempts=1,
+            )
+        ) as gateway,
+    ):
+        watchdog = EventLoopWatchdog()
+        await watchdog.start()
+        slow_task = asyncio.create_task(gateway.generate_one(_request("slow-upstream")))
+        while server.active_requests == 0:
+            await asyncio.sleep(0.001)
+        fast = await gateway.generate_one(_request("fast-during-slow"))
+        fast_completed_while_slow_pending = not slow_task.done()
+        slow = await slow_task
+        slow_upstream = await watchdog.stop()
+
+    blocking_watchdog = EventLoopWatchdog()
+    await blocking_watchdog.start()
+    await asyncio.sleep(0.02)
+    sleep(0.12)
+    await asyncio.sleep(0.02)
+    controlled_block = await blocking_watchdog.stop()
+
+    return {
+        "slow_upstream": {
+            **slow_upstream,
+            "slow_status": slow.status.value,
+            "fast_status": fast.status.value,
+            "fast_completed_while_slow_pending": fast_completed_while_slow_pending,
+        },
+        "controlled_block": controlled_block,
     }
 
 
@@ -271,6 +372,9 @@ def gateway_smoke_succeeded(summary: Mapping[str, Any]) -> bool:
     scenarios = summary["scenarios"]
     backpressure = summary["backpressure"]
     comparison = summary["comparison"]
+    event_loop = summary["event_loop"]
+    slow_upstream = event_loop["slow_upstream"]
+    controlled_block = event_loop["controlled_block"]
     return bool(
         scenarios["retry_429_attempts"] == 2
         and scenarios["retry_429_error_history"] == ["rate_limited"]
@@ -285,6 +389,13 @@ def gateway_smoke_succeeded(summary: Mapping[str, Any]) -> bool:
         <= backpressure["configured_concurrency"]
         and all(row["all_succeeded"] for row in comparison)
         and all(row["max_fake_server_active_requests"] <= 4 for row in comparison)
+        and slow_upstream["slow_status"] == GenerationStatus.SUCCEEDED.value
+        and slow_upstream["fast_status"] == GenerationStatus.SUCCEEDED.value
+        and slow_upstream["fast_completed_while_slow_pending"]
+        and slow_upstream["heartbeat_count"] >= 3
+        and slow_upstream["max_lag_ms"] < slow_upstream["threshold_ms"]
+        and controlled_block["block_detected"]
+        and controlled_block["max_lag_ms"] >= controlled_block["threshold_ms"]
     )
 
 
@@ -292,6 +403,9 @@ def gateway_smoke_markdown(summary: Mapping[str, Any]) -> str:
     scenarios = summary["scenarios"]
     backpressure = summary["backpressure"]
     comparison = summary["comparison"]
+    event_loop = summary["event_loop"]
+    slow_upstream = event_loop["slow_upstream"]
+    controlled_block = event_loop["controlled_block"]
     retry_causes = ", ".join(
         scenarios["retry_429_error_history"] + scenarios["retry_500_error_history"]
     )
@@ -313,6 +427,13 @@ def gateway_smoke_markdown(summary: Mapping[str, Any]) -> str:
             f"| 5xx retry | {scenarios['retry_500_attempts']} attempts |",
             f"| Retry root causes | {retry_causes} |",
             f"| Slow response | {scenarios['slow_status']} |",
+            "| Slow upstream event-loop lag | "
+            f"{slow_upstream['max_lag_ms']} ms / {slow_upstream['threshold_ms']} ms |",
+            "| Fast request while slow upstream pending | "
+            f"{slow_upstream['fast_completed_while_slow_pending']} |",
+            "| Controlled block detected | "
+            f"{controlled_block['block_detected']} "
+            f"({controlled_block['max_lag_ms']} ms / {controlled_block['threshold_ms']} ms) |",
             f"| Disconnect retry | {scenarios['disconnect_attempts']} attempts |",
             f"| Malformed JSON | {scenarios['malformed_error_class']} |",
             "| Bounded fake-server concurrency | "
@@ -336,6 +457,9 @@ def gateway_smoke_markdown(summary: Mapping[str, Any]) -> str:
             "## Limitations",
             "",
             "- This deterministic local-fake-server smoke is not a provider compatibility claim.",
+            "- The watchdog samples one local event loop. It distinguishes this gateway's",
+            "  awaited I/O from a deliberate synchronous block; it is not a host-wide",
+            "  scheduling or latency-service-level guarantee.",
             "- The comparison measures Python allocation tracing, not process RSS, and is only",
             "  directional for this machine and local workload.",
             "",

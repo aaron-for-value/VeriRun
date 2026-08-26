@@ -37,3 +37,5 @@ jobs:
         run: python -m build
       - name: Run trusted synthetic smoke twice
         run: python -m verirun smoke --output .verirun/evidence/v0.1/synthetic
+      - name: Run deterministic v0.2 gateway smoke
+        run: python -m verirun gateway-smoke --output .verirun/evidence/v0.2/gateway-smoke

@@ -61,7 +61,10 @@ Run the deterministic fake-server exercise without an API key:
 
 It covers 429, 5xx, slow response, disconnect, malformed JSON, bounded
 concurrency, retry amplification, and a small comparison of sequential, eager-task,
-and bounded-worker submission. The test suite uses the same server for parent
+and bounded-worker submission. It also records a local event-loop watchdog: while a
+120 ms upstream response is pending, a fast request and 10 ms heartbeat must continue
+with maximum observed lag below 100 ms. A separate deliberate 120 ms synchronous block
+must be detected by that same watchdog. The test suite uses the same server for parent
 cancellation and timeout-cleanup checks. The comparison reports throughput,
 admitted-request P95, and Python traced-allocation peak for the recorded machine;
 it is not a model or provider performance benchmark.

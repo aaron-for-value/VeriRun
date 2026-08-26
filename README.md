@@ -130,9 +130,10 @@ Run the local deterministic fault exercise without credentials:
 ```
 
 The command covers 429, 5xx, slow response, disconnect, malformed JSON, bounded
-backpressure, and a directional local submission comparison. The test suite also
-checks cancellation cleanup. See [the async gateway contract](docs/ASYNC_GATEWAY.md)
-for policy boundaries.
+backpressure, a directional local submission comparison, and an event-loop watchdog:
+a fast request and heartbeat continue while a slow upstream response is pending, while
+a deliberate synchronous block is detected. The test suite also checks cancellation
+cleanup. See [the async gateway contract](docs/ASYNC_GATEWAY.md) for policy boundaries.
 
 The [v0.2.0 release](https://github.com/aaron-for-value/VeriRun/releases/tag/v0.2.0)
 includes the local fault evidence and versioned gateway schemas. It does not add a

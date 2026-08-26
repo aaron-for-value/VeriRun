@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
+from time import sleep
 
 import pytest
 
@@ -14,6 +15,7 @@ from verirun.gateway import (
     GenerationStatus,
 )
 from verirun.gateway_smoke import (
+    EventLoopWatchdog,
     ScriptedOpenAIServer,
     ScriptedResponse,
     gateway_smoke_succeeded,
@@ -210,3 +212,20 @@ def test_gateway_smoke_writes_fault_and_submission_evidence(tmp_path: Path) -> N
     assert gateway_smoke_succeeded(summary)
     assert (tmp_path / "gateway" / "summary.json").is_file()
     assert (tmp_path / "gateway" / "REPORT.md").is_file()
+
+
+def test_event_loop_watchdog_detects_a_deliberate_block() -> None:
+    async def scenario() -> None:
+        watchdog = EventLoopWatchdog(
+            sample_interval_seconds=0.005,
+            detection_threshold_seconds=0.02,
+        )
+        await watchdog.start()
+        await asyncio.sleep(0.01)
+        sleep(0.03)
+        await asyncio.sleep(0.01)
+        measurement = await watchdog.stop()
+        assert measurement["block_detected"]
+        assert measurement["max_lag_ms"] >= measurement["threshold_ms"]
+
+    asyncio.run(scenario())

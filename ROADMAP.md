@@ -193,6 +193,20 @@ v0.2.0 was released after PR [#17](https://github.com/aaron-for-value/VeriRun/pu
 merged and GitHub Actions `quality` passed. See the
 [v0.2.0 release](https://github.com/aaron-for-value/VeriRun/releases/tag/v0.2.0).
 
+### M1 event-loop evidence addendum
+
+This post-v0.2 evidence distinguishes a slow awaited upstream response from a
+synchronous event-loop block; it does not expand v0.2.0 into a provider-performance
+or runtime-SLA claim.
+
+- A 10 ms local heartbeat and a fast request continue while a 120 ms fake upstream
+  response is pending; the report records the observed maximum scheduling lag.
+- A separate, deliberately injected 120 ms synchronous block must cross the 100 ms
+  watchdog threshold and be reported as detected.
+- The deterministic fake-server report and CI smoke run are published under
+  [`evidence/v0.2/gateway-smoke/`](evidence/v0.2/gateway-smoke/). A clean-revision
+  report is required before this addendum is cited as merged evidence.
+
 ### Not in scope
 
 - Provider-specific orchestration beyond the OpenAI-compatible contract.
