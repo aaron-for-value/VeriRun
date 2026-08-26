@@ -6,8 +6,8 @@
 ## Reproduction contract
 
 - EvalPlus package: `v0.3.1` at `e5d0ed0bab96280b60b637ec7f15b5e4841b0cb2`
-- Source revision: `555a176126363d401874d266dc00adf02818d6ed`
-- Working tree clean at start: `False`
+- Source revision: `0f13363eca78c5090c62c3e88f37f0e11ccfa4d4`
+- Working tree clean at start: `True`
 - Python: `3.12.13` on `macOS-26.5.2-arm64-arm-64bit`
 - EvalPlus max memory bytes: `-1`
 - Protocol: standard ordered workloads for oracle and obvious-failure fixtures;
