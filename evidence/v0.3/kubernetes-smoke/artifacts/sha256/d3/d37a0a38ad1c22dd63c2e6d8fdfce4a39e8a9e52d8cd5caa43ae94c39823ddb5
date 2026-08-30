@@ -1,0 +1,4 @@
+def exhaust_memory() -> None:
+    blocks = []
+    while True:
+        blocks.append(b'x' * (1024 * 1024))

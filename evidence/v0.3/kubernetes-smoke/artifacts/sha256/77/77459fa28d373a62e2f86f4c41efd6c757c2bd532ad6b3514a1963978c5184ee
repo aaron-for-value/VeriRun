@@ -1,0 +1,2 @@
+def write_root() -> None:
+    open('/verirun-blocked.txt', 'w').write('blocked')

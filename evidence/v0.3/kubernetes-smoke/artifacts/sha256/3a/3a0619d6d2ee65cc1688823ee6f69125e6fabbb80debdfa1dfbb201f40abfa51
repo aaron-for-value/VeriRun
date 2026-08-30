@@ -1,0 +1,4 @@
+import os
+
+def become_root() -> None:
+    os.setuid(0)

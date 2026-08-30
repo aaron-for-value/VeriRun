@@ -1,0 +1,2 @@
+def flood() -> None:
+    print('x' * 8192)
