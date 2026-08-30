@@ -246,7 +246,7 @@ Run untrusted candidates through explicit execution tiers and publish security e
   timeout, bounded output, OOM, egress, root-write, privilege, source, and artifact
   probes all produced their expected classifications with no Job/Pod residue.
   The checked-in [clean-revision report](evidence/v0.3/kubernetes-smoke/REPORT.md)
-  records Kubernetes/node/runtime identity, and the [CI quality gate](https://github.com/aaron-for-value/VeriRun/actions/runs/33295826876)
+  records Kubernetes/node/runtime identity, and the [CI quality gate](https://github.com/aaron-for-value/VeriRun/actions/runs/33296303955)
   passed. This is local runtime evidence, not a tagged release or a broad security claim.
 
 ### Exit evidence
