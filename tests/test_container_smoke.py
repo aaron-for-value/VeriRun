@@ -50,6 +50,10 @@ def test_container_smoke_writes_replayable_evidence_without_a_docker_daemon(
         return LocalExecutor().execute(manifest, store, attempt_id=attempt_id)
 
     monkeypatch.setattr(ContainerExecutor, "execute", execute_as_local)
+    monkeypatch.setattr(
+        "verirun.container_smoke.source_state",
+        lambda: {"revision": "clean-revision", "working_tree_clean": True, "source": "git"},
+    )
 
     summary = run_container_smoke(
         tmp_path,
@@ -57,6 +61,11 @@ def test_container_smoke_writes_replayable_evidence_without_a_docker_daemon(
     )
 
     assert container_smoke_succeeded(summary)
+    assert summary["source"] == {
+        "revision": "clean-revision",
+        "working_tree_clean": True,
+        "source": "git",
+    }
     assert (tmp_path / "summary.json").is_file()
     assert (tmp_path / "REPORT.md").is_file()
     assert (tmp_path / "cases" / "container-timeout" / "comparison.json").is_file()

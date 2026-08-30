@@ -98,6 +98,10 @@ def test_kubernetes_smoke_writes_replayable_evidence_without_a_cluster(
         )
 
     monkeypatch.setattr(KubernetesJobExecutor, "execute", execute_as_expected)
+    monkeypatch.setattr(
+        "verirun.kubernetes_smoke.source_state",
+        lambda: {"revision": "clean-revision", "working_tree_clean": True, "source": "git"},
+    )
 
     summary = run_kubernetes_smoke(
         tmp_path,
@@ -108,6 +112,11 @@ def test_kubernetes_smoke_writes_replayable_evidence_without_a_cluster(
     )
 
     assert kubernetes_smoke_succeeded(summary)
+    assert summary["source"] == {
+        "revision": "clean-revision",
+        "working_tree_clean": True,
+        "source": "git",
+    }
     assert (tmp_path / "summary.json").is_file()
     assert (tmp_path / "REPORT.md").is_file()
     assert (tmp_path / "cases" / "kubernetes-artifact-tamper" / "comparison.json").is_file()

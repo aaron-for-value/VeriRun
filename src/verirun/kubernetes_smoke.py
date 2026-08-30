@@ -228,6 +228,7 @@ def run_kubernetes_smoke(
 ) -> dict[str, Any]:
     """Execute the v0.3 Kubernetes attack matrix twice and write evidence."""
 
+    source = source_state()
     output.mkdir(parents=True, exist_ok=True)
     store = ArtifactStore(output / "artifacts")
     executor = KubernetesJobExecutor()
@@ -294,7 +295,7 @@ def run_kubernetes_smoke(
             "platform": platform.platform(),
             "implementation": platform.python_implementation(),
         },
-        "source": source_state(),
+        "source": source,
         "expected_statuses_matched": all(item["expected_matched"] for item in cases),
         "semantic_replays_matched": all(item["comparison"]["matched"] for item in cases),
         "cases": cases,

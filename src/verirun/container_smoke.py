@@ -141,6 +141,7 @@ def container_smoke_markdown(summary: dict[str, Any]) -> str:
 
 
 def run_container_smoke(output: Path, *, image: str) -> dict[str, Any]:
+    source = source_state()
     output.mkdir(parents=True, exist_ok=True)
     store = ArtifactStore(output / "artifacts")
     executor = ContainerExecutor()
@@ -177,7 +178,7 @@ def run_container_smoke(output: Path, *, image: str) -> dict[str, Any]:
             "platform": platform.platform(),
             "implementation": platform.python_implementation(),
         },
-        "source": source_state(),
+        "source": source,
         "expected_statuses_matched": all(item["expected_matched"] for item in cases),
         "semantic_replays_matched": all(item["comparison"]["matched"] for item in cases),
         "cases": cases,
