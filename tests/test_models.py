@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from verirun.models import ArtifactRef, BenchmarkSpec, VerificationStatus
+from verirun.models import ArtifactRef, BenchmarkSpec, ExecutionSpec, VerificationStatus
 
 
 def artifact() -> ArtifactRef:
@@ -83,4 +83,71 @@ def test_benchmark_digest_rejects_unqualified_hash() -> None:
             subset_label="subset",
             task_ids=("Task/0",),
             standard_protocol=False,
+        )
+
+
+def test_container_tier_requires_pinned_image_and_limits() -> None:
+    with pytest.raises(ValidationError, match="image, CPU, memory, and PID"):
+        ExecutionSpec(engine="container", sandbox_policy="development-container")
+
+    with pytest.raises(ValidationError, match="container_image"):
+        ExecutionSpec(
+            engine="container",
+            sandbox_policy="development-container",
+            container_image="python:3.12-slim",
+            container_cpus=1.0,
+            container_memory_mb=256,
+            container_pids_limit=64,
+        )
+
+    spec = ExecutionSpec(
+        engine="container",
+        sandbox_policy="development-container",
+        container_image=f"example.invalid/verirun@sha256:{'c' * 64}",
+        container_cpus=1.0,
+        container_memory_mb=256,
+        container_pids_limit=64,
+    )
+    assert spec.container_memory_mb == 256
+
+
+def test_local_tier_rejects_container_settings() -> None:
+    with pytest.raises(ValidationError, match="local engine cannot declare"):
+        ExecutionSpec(container_memory_mb=256)
+
+
+def test_kubernetes_tier_requires_gvisor_contract() -> None:
+    image = f"example.invalid/verirun@sha256:{'c' * 64}"
+    with pytest.raises(ValidationError, match="context, namespace, and RuntimeClass"):
+        ExecutionSpec(
+            engine="kubernetes",
+            sandbox_policy="kubernetes-gvisor",
+            container_image=image,
+            container_cpus=1.0,
+            container_memory_mb=256,
+        )
+
+    spec = ExecutionSpec(
+        engine="kubernetes",
+        sandbox_policy="kubernetes-gvisor",
+        container_image=image,
+        container_cpus=1.0,
+        container_memory_mb=256,
+        kubernetes_context="colima-verirun-gvisor",
+        kubernetes_namespace="verirun-m2",
+        kubernetes_runtime_class="gvisor",
+    )
+    assert spec.kubernetes_runtime_class == "gvisor"
+
+    with pytest.raises(ValidationError, match="Docker PID"):
+        ExecutionSpec(
+            engine="kubernetes",
+            sandbox_policy="kubernetes-gvisor",
+            container_image=image,
+            container_cpus=1.0,
+            container_memory_mb=256,
+            container_pids_limit=64,
+            kubernetes_context="colima-verirun-gvisor",
+            kubernetes_namespace="verirun-m2",
+            kubernetes_runtime_class="gvisor",
         )

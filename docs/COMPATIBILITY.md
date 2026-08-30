@@ -12,6 +12,7 @@ VeriRun records exact versions in evidence artifacts. This document lists suppor
 | HumanEval+ dataset | v0.1.10 + runtime API MD5 | Evidence-bound | Exact algorithm-qualified hash is captured from `get_human_eval_plus_hash`. |
 | MBPP+ dataset | v0.2.0 + runtime API MD5 | Evidence-bound | Exact algorithm-qualified hash is captured from `get_mbpp_plus_hash`; full M0 evidence covers the ordered 378-task workload. |
 | Local executor | `trusted-fixtures-only` | Development only | Not a security boundary. |
+| Container executor | `development-container` + digest-pinned image | In development | Docker development tier only; no network, read-only runner mount, non-root, capability drop, and explicit resource limits. Not gVisor evidence. |
 | macOS arm64 | Local development | Supported for protocol work | Not valid gVisor security evidence. |
 | Linux | Planned validation | Not yet evidenced | Required for later sandbox work. |
 | Kubernetes + gVisor | v0.3 target | Not implemented | No v0.1 security claim. |

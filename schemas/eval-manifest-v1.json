@@ -138,11 +138,106 @@
           "title": "Concurrency",
           "type": "integer"
         },
+        "container_cpus": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Container Cpus"
+        },
+        "container_image": {
+          "anyOf": [
+            {
+              "pattern": "^.+@sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Container Image"
+        },
+        "container_memory_mb": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Container Memory Mb"
+        },
+        "container_pids_limit": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Container Pids Limit"
+        },
         "engine": {
-          "const": "local",
           "default": "local",
+          "enum": [
+            "local",
+            "container",
+            "kubernetes"
+          ],
           "title": "Engine",
           "type": "string"
+        },
+        "kubernetes_context": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kubernetes Context"
+        },
+        "kubernetes_namespace": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kubernetes Namespace"
+        },
+        "kubernetes_runtime_class": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kubernetes Runtime Class"
         },
         "retry_policy": {
           "const": "none",
@@ -151,8 +246,12 @@
           "type": "string"
         },
         "sandbox_policy": {
-          "const": "trusted-fixtures-only",
           "default": "trusted-fixtures-only",
+          "enum": [
+            "trusted-fixtures-only",
+            "development-container",
+            "kubernetes-gvisor"
+          ],
           "title": "Sandbox Policy",
           "type": "string"
         }

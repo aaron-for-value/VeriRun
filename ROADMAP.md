@@ -49,7 +49,7 @@ The project reaches v1.0 only when these properties are demonstrated across supp
 | Foundation | Public contract, governance baseline, and GitHub operating model | **Verification** |
 | v0.1 — Protocol Baseline | Reproducible verification and frozen-candidate replay | **Complete (v0.1.0)** |
 | v0.2 — Async Model Gateway | Bounded model generation with correct failure and cancellation semantics | **Complete (v0.2.0)** |
-| v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | Queued |
+| v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | **In progress (development-container contract)** |
 | v0.4 — Durable Control Plane | Recoverable runs with frozen verification plans, comparable cohorts, leases, heartbeats, replay, and idempotent result commit | Queued |
 | v0.5 — Distributed Executor | Bounded Ray/KubeRay execution with failure recovery | Queued |
 | v0.6 — Reliability & Evaluation Evidence | Correlated observability, capacity/chaos reports, and valid statistics | Queued |
@@ -227,6 +227,26 @@ Run untrusted candidates through explicit execution tiers and publish security e
 - gVisor `RuntimeClass` validation on Linux/Kubernetes.
 - Cleanup and duplicate-final-result handling across Job retries.
 - Attack regression suite.
+
+### M2 development status
+
+- The manifest and CLI now support a digest-pinned development-container tier with
+  no network, read-only filesystem, non-root execution, removed capabilities,
+  memory/PID limits, and explicit timeout cleanup.
+- Its threat model and current regression boundary are recorded in
+  [`docs/ISOLATED_EXECUTION.md`](docs/ISOLATED_EXECUTION.md). This is explicitly
+  development-container evidence, not a Kubernetes/gVisor completion claim.
+- The manifest, CLI, and executor now also encode a restricted Kubernetes Job tier:
+  pinned image identity, explicit context/namespace/RuntimeClass, default-deny egress
+  preflight, restricted Pod settings, bounded log collection, `backoffLimit: 0`, and
+  mandatory Job cleanup. This is implementation and regression coverage, not a
+  completed security claim.
+- A local Linux kind environment has successfully run the restricted
+  `RuntimeClass(handler: runsc)` contract and a nine-case baseline/replay matrix:
+  timeout, bounded output, OOM, egress, root-write, privilege, source, and artifact
+  probes all produced their expected classifications with no Job/Pod residue.
+  This local record is not release evidence because it was generated from a dirty
+  source tree; a clean-revision, checked-in report and CI gate remain required.
 
 ### Exit evidence
 

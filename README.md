@@ -78,7 +78,7 @@ The control plane owns intent and durable state. The execution plane performs re
 |---|---|---|
 | Immutable manifests, hashing, structured verification, deterministic replay | v0.1 | **Released (v0.1.0)** |
 | Bounded async model gateway with cancellation and classified retries | v0.2 | **Released (v0.2.0)** |
-| Container development backend and Kubernetes + gVisor validation backend | v0.3 | Planned |
+| Digest-pinned container development backend; restricted Kubernetes + gVisor Job contract | v0.3 | **In progress; no published Linux attack evidence** |
 | Durable run state, leases, heartbeats, replay, and idempotent commit | v0.4 | Planned |
 | Ray/KubeRay execution with bounded in-flight work and failure recovery | v0.5 | Planned |
 | OpenTelemetry, capacity/chaos evidence, and statistically valid reports | v0.6 | Planned |
@@ -246,6 +246,52 @@ The pinned EvalPlus adapter remains optional because its upstream dependency tre
 ```
 
 The EvalPlus command runs a labeled three-task HumanEval+ compatibility subset twice. It does not produce a standard benchmark score. See [BENCHMARK_PROTOCOL.md](BENCHMARK_PROTOCOL.md) for the exact claim boundary.
+
+## v0.3 development-container tier
+
+M2 has begun the isolated-execution work with a digest-pinned Docker development
+tier. It rejects mutable images, disables networking, uses a read-only filesystem,
+runs as non-root with no capabilities, applies memory/PID limits, and treats failed
+container cleanup as an infrastructure error. The exact threat model, command
+contract, residual risks, and local recipe are in
+[`docs/ISOLATED_EXECUTION.md`](docs/ISOLATED_EXECUTION.md).
+
+This tier reduces local operational risk only. It is not a security sandbox claim,
+and neither macOS nor a default Docker runtime is presented as Linux/Kubernetes/gVisor
+evidence.
+
+The same manifest family now also has an explicit Kubernetes Job tier: it requires a
+digest-pinned image, explicit context/namespace/`RuntimeClass`, default-deny egress
+preflight, restricted Pod settings, bounded logs, zero Job retries, and cleanup. It
+has passed a local kind/gVisor attack matrix, but is not yet a release or broad
+security claim: clean-revision public evidence remains required. See
+[`docs/ISOLATED_EXECUTION.md`](docs/ISOLATED_EXECUTION.md).
+
+Run the reproducible development-container smoke only after pre-pulling an exact
+digest for the local architecture:
+
+```bash
+VERIRUN_CONTAINER_IMAGE='python@sha256:<64-hex-digest>' make container-smoke
+```
+
+It records pass, timeout, read-only-workspace, and no-network scenarios twice. The
+generated report is development-container evidence, not a release or gVisor claim.
+
+For a provisioned Kubernetes namespace with a `default-deny-egress` policy and a
+verified `gvisor` RuntimeClass, run the stronger local runtime matrix:
+
+```bash
+VERIRUN_CONTAINER_IMAGE='python@sha256:<64-hex-digest>' \
+VERIRUN_KUBERNETES_CONTEXT='kind-verirun-m2' \
+VERIRUN_KUBERNETES_NAMESPACE='verirun-m2-live' \
+VERIRUN_KUBERNETES_RUNTIME_CLASS='gvisor' \
+make kubernetes-smoke
+```
+
+It records a pass control plus timeout, output-flood, OOM, egress, read-only-root,
+privilege-escalation, invalid-source, and artifact-tamper probes twice. The report is
+written under `.verirun/evidence/v0.3/kubernetes-smoke/`; use `make
+evidence-kubernetes` only to refresh checked-in evidence from a clean revision.
 
 EvalPlus v0.3.1's memory `setrlimit` path is incompatible with Darwin on the current supported macOS environment. For this built-in deterministic trusted smoke only, macOS evidence is run with `EVALPLUS_MAX_MEMORY_BYTES=-1`; the setting is recorded in the report. Linux verification keeps the upstream default. Neither path is sandbox evidence.
 

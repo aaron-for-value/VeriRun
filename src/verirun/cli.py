@@ -8,6 +8,7 @@ from pathlib import Path
 
 from verirun.artifacts import ArtifactStore
 from verirun.canonical import content_hash, write_canonical_json
+from verirun.container_smoke import container_smoke_succeeded, run_container_smoke
 from verirun.evalplus_m0 import (
     STANDARD_DATASETS,
     STANDARD_RECIPES,
@@ -20,10 +21,11 @@ from verirun.evalplus_smoke import (
     evalplus_smoke_succeeded,
     run_evalplus_smoke,
 )
-from verirun.executor import LocalExecutor
+from verirun.executor import executor_for
 from verirun.fixtures import SmokeCase, build_smoke_manifest
 from verirun.gateway_smoke import gateway_smoke_succeeded, run_gateway_smoke
-from verirun.models import EvalManifest, VerificationResult, VerificationStatus
+from verirun.kubernetes_smoke import kubernetes_smoke_succeeded, run_kubernetes_smoke
+from verirun.models import EvalManifest, ExecutionSpec, VerificationResult, VerificationStatus
 from verirun.replay import compare_results
 from verirun.smoke import run_smoke, smoke_succeeded
 
@@ -48,13 +50,49 @@ def _verify(args: argparse.Namespace) -> int:
         expected_status=VerificationStatus.PASSED,
     )
     manifest = build_smoke_manifest(case, store)
+    execution = ExecutionSpec()
+    verifier_updates: dict[str, object] = {"timeout_seconds": args.timeout}
+    if args.engine in {"container", "kubernetes"}:
+        image = args.container_image
+        if image is None:
+            raise ValueError("--container-image is required with an isolated engine")
+        if args.engine == "container":
+            execution = ExecutionSpec(
+                engine="container",
+                sandbox_policy="development-container",
+                container_image=image,
+                container_cpus=args.container_cpus,
+                container_memory_mb=args.container_memory_mb,
+                container_pids_limit=args.container_pids_limit,
+            )
+        else:
+            required = {
+                "--kubernetes-context": args.kubernetes_context,
+                "--kubernetes-namespace": args.kubernetes_namespace,
+                "--kubernetes-runtime-class": args.kubernetes_runtime_class,
+            }
+            missing = [flag for flag, value in required.items() if value is None]
+            if missing:
+                raise ValueError(f"{' '.join(missing)} is required with --engine kubernetes")
+            execution = ExecutionSpec(
+                engine="kubernetes",
+                sandbox_policy="kubernetes-gvisor",
+                container_image=image,
+                container_cpus=args.container_cpus,
+                container_memory_mb=args.container_memory_mb,
+                kubernetes_context=args.kubernetes_context,
+                kubernetes_namespace=args.kubernetes_namespace,
+                kubernetes_runtime_class=args.kubernetes_runtime_class,
+            )
+        verifier_updates["image_digest"] = image.rsplit("@", maxsplit=1)[1]
     manifest = manifest.model_copy(
         update={
             "run_id": args.run_id,
-            "verifier": manifest.verifier.model_copy(update={"timeout_seconds": args.timeout}),
+            "verifier": manifest.verifier.model_copy(update=verifier_updates),
+            "execution": execution,
         }
     )
-    result = LocalExecutor().execute(manifest, store)
+    result = executor_for(manifest).execute(manifest, store)
     args.output.mkdir(parents=True, exist_ok=True)
     write_canonical_json(args.output / "manifest.json", manifest)
     write_canonical_json(args.output / "result.json", result)
@@ -66,7 +104,7 @@ def _replay(args: argparse.Namespace) -> int:
     manifest = _load_manifest(args.manifest)
     baseline = _load_result(args.baseline)
     store = ArtifactStore(args.store)
-    replay = LocalExecutor().execute(manifest, store)
+    replay = executor_for(manifest).execute(manifest, store)
     comparison = compare_results(baseline, replay)
     args.output.mkdir(parents=True, exist_ok=True)
     write_canonical_json(args.output / "replay.json", replay)
@@ -130,6 +168,30 @@ def _gateway_smoke(args: argparse.Namespace) -> int:
     return 0 if gateway_smoke_succeeded(summary) else 6
 
 
+def _container_smoke(args: argparse.Namespace) -> int:
+    summary = run_container_smoke(args.output, image=args.image)
+    print(
+        f"container_smoke_succeeded={str(container_smoke_succeeded(summary)).lower()} "
+        f"image={summary['container_image']}"
+    )
+    return 0 if container_smoke_succeeded(summary) else 8
+
+
+def _kubernetes_smoke(args: argparse.Namespace) -> int:
+    summary = run_kubernetes_smoke(
+        args.output,
+        image=args.image,
+        context=args.kubernetes_context,
+        namespace=args.kubernetes_namespace,
+        runtime_class=args.kubernetes_runtime_class,
+    )
+    print(
+        f"kubernetes_smoke_succeeded={str(kubernetes_smoke_succeeded(summary)).lower()} "
+        f"runtime_class={summary['kubernetes_runtime_class']}"
+    )
+    return 0 if kubernetes_smoke_succeeded(summary) else 9
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="verirun")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -174,13 +236,49 @@ def build_parser() -> argparse.ArgumentParser:
     gateway_smoke.add_argument("--output", type=Path, default=Path("evidence/v0.2/gateway-smoke"))
     gateway_smoke.set_defaults(handler=_gateway_smoke)
 
-    verify = subparsers.add_parser("verify", help="verify one trusted Python candidate")
+    container_smoke = subparsers.add_parser(
+        "container-smoke", help="run v0.3 development-container runtime scenarios twice"
+    )
+    container_smoke.add_argument(
+        "--image",
+        required=True,
+        help="pre-pulled digest-pinned Python image, for example repo@sha256:<digest>",
+    )
+    container_smoke.add_argument(
+        "--output", type=Path, default=Path("evidence/v0.3/container-smoke")
+    )
+    container_smoke.set_defaults(handler=_container_smoke)
+
+    kubernetes_smoke = subparsers.add_parser(
+        "kubernetes-smoke", help="run v0.3 Kubernetes/gVisor attack scenarios twice"
+    )
+    kubernetes_smoke.add_argument("--image", required=True, help="digest-pinned Python image")
+    kubernetes_smoke.add_argument("--kubernetes-context", required=True)
+    kubernetes_smoke.add_argument("--kubernetes-namespace", required=True)
+    kubernetes_smoke.add_argument("--kubernetes-runtime-class", required=True)
+    kubernetes_smoke.add_argument(
+        "--output", type=Path, default=Path("evidence/v0.3/kubernetes-smoke")
+    )
+    kubernetes_smoke.set_defaults(handler=_kubernetes_smoke)
+
+    verify = subparsers.add_parser("verify", help="verify one Python candidate in a declared tier")
     verify.add_argument("--candidate", type=Path, required=True)
     verify.add_argument("--tests", type=Path, required=True)
     verify.add_argument("--task-id", required=True)
     verify.add_argument("--candidate-id", required=True)
     verify.add_argument("--run-id", required=True)
     verify.add_argument("--timeout", type=float, default=2.0)
+    verify.add_argument("--engine", choices=("local", "container", "kubernetes"), default="local")
+    verify.add_argument(
+        "--container-image",
+        help="digest-pinned image required for container tier, for example repo@sha256:<digest>",
+    )
+    verify.add_argument("--container-memory-mb", type=int, default=256)
+    verify.add_argument("--container-cpus", type=float, default=1.0)
+    verify.add_argument("--container-pids-limit", type=int, default=64)
+    verify.add_argument("--kubernetes-context")
+    verify.add_argument("--kubernetes-namespace")
+    verify.add_argument("--kubernetes-runtime-class")
     verify.add_argument("--store", type=Path, default=Path(".verirun/artifacts"))
     verify.add_argument("--output", type=Path, default=Path(".verirun/latest"))
     verify.set_defaults(handler=_verify)

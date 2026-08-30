@@ -1,4 +1,4 @@
-.PHONY: build check evidence-evalplus evidence-evalplus-m0 evidence-gateway evidence-synthetic evalplus-m0 evalplus-smoke format gateway-smoke lint schemas smoke test typecheck
+.PHONY: build check container-smoke evidence-container evidence-evalplus evidence-evalplus-m0 evidence-gateway evidence-kubernetes evidence-synthetic evalplus-m0 evalplus-smoke format gateway-smoke kubernetes-smoke lint schemas smoke test typecheck
 
 PYTHON := .venv/bin/python
 
@@ -33,6 +33,17 @@ evalplus-m0:
 gateway-smoke:
 	$(PYTHON) -m verirun gateway-smoke --output .verirun/evidence/v0.2/gateway-smoke
 
+container-smoke:
+	test -n "$(VERIRUN_CONTAINER_IMAGE)"
+	$(PYTHON) -m verirun container-smoke --image "$(VERIRUN_CONTAINER_IMAGE)" --output .verirun/evidence/v0.3/container-smoke
+
+kubernetes-smoke:
+	test -n "$(VERIRUN_CONTAINER_IMAGE)"
+	test -n "$(VERIRUN_KUBERNETES_CONTEXT)"
+	test -n "$(VERIRUN_KUBERNETES_NAMESPACE)"
+	test -n "$(VERIRUN_KUBERNETES_RUNTIME_CLASS)"
+	$(PYTHON) -m verirun kubernetes-smoke --image "$(VERIRUN_CONTAINER_IMAGE)" --kubernetes-context "$(VERIRUN_KUBERNETES_CONTEXT)" --kubernetes-namespace "$(VERIRUN_KUBERNETES_NAMESPACE)" --kubernetes-runtime-class "$(VERIRUN_KUBERNETES_RUNTIME_CLASS)" --output .verirun/evidence/v0.3/kubernetes-smoke
+
 evidence-synthetic:
 	$(PYTHON) -m verirun smoke --output evidence/v0.1/synthetic
 
@@ -44,5 +55,16 @@ evidence-evalplus-m0:
 
 evidence-gateway:
 	$(PYTHON) -m verirun gateway-smoke --output evidence/v0.2/gateway-smoke
+
+evidence-container:
+	test -n "$(VERIRUN_CONTAINER_IMAGE)"
+	$(PYTHON) -m verirun container-smoke --image "$(VERIRUN_CONTAINER_IMAGE)" --output evidence/v0.3/container-smoke
+
+evidence-kubernetes:
+	test -n "$(VERIRUN_CONTAINER_IMAGE)"
+	test -n "$(VERIRUN_KUBERNETES_CONTEXT)"
+	test -n "$(VERIRUN_KUBERNETES_NAMESPACE)"
+	test -n "$(VERIRUN_KUBERNETES_RUNTIME_CLASS)"
+	$(PYTHON) -m verirun kubernetes-smoke --image "$(VERIRUN_CONTAINER_IMAGE)" --kubernetes-context "$(VERIRUN_KUBERNETES_CONTEXT)" --kubernetes-namespace "$(VERIRUN_KUBERNETES_NAMESPACE)" --kubernetes-runtime-class "$(VERIRUN_KUBERNETES_RUNTIME_CLASS)" --output evidence/v0.3/kubernetes-smoke
 
 check: lint typecheck schemas test build smoke

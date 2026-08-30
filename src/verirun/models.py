@@ -15,6 +15,7 @@ DatasetDigest = Annotated[
     Field(pattern=r"^(?:md5:[0-9a-f]{32}|sha256:[0-9a-f]{64})$"),
 ]
 NonEmpty = Annotated[str, Field(min_length=1)]
+ContainerImage = Annotated[str, Field(pattern=r"^.+@sha256:[0-9a-f]{64}$")]
 
 
 class FrozenModel(BaseModel):
@@ -101,10 +102,58 @@ class VerifierSpec(FrozenModel):
 
 
 class ExecutionSpec(FrozenModel):
-    engine: Literal["local"] = "local"
+    engine: Literal["local", "container", "kubernetes"] = "local"
     concurrency: Annotated[int, Field(gt=0)] = 1
     retry_policy: Literal["none"] = "none"
-    sandbox_policy: Literal["trusted-fixtures-only"] = "trusted-fixtures-only"
+    sandbox_policy: Literal[
+        "trusted-fixtures-only", "development-container", "kubernetes-gvisor"
+    ] = "trusted-fixtures-only"
+    container_image: ContainerImage | None = None
+    container_cpus: Annotated[float, Field(gt=0)] | None = None
+    container_memory_mb: Annotated[int, Field(gt=0)] | None = None
+    container_pids_limit: Annotated[int, Field(gt=0)] | None = None
+    kubernetes_context: NonEmpty | None = None
+    kubernetes_namespace: NonEmpty | None = None
+    kubernetes_runtime_class: NonEmpty | None = None
+
+    @model_validator(mode="after")
+    def validate_execution_tier(self) -> ExecutionSpec:
+        container_fields = (
+            self.container_image,
+            self.container_cpus,
+            self.container_memory_mb,
+            self.container_pids_limit,
+        )
+        kubernetes_fields = (
+            self.kubernetes_context,
+            self.kubernetes_namespace,
+            self.kubernetes_runtime_class,
+        )
+        if self.engine == "local":
+            if self.sandbox_policy != "trusted-fixtures-only":
+                raise ValueError("local engine requires trusted-fixtures-only policy")
+            if any(value is not None for value in container_fields):
+                raise ValueError("local engine cannot declare container settings")
+            if any(value is not None for value in kubernetes_fields):
+                raise ValueError("local engine cannot declare Kubernetes settings")
+            return self
+        if self.engine == "container":
+            if self.sandbox_policy != "development-container":
+                raise ValueError("container engine requires development-container policy")
+            if any(value is None for value in container_fields):
+                raise ValueError("container engine requires image, CPU, memory, and PID limits")
+            if any(value is not None for value in kubernetes_fields):
+                raise ValueError("container engine cannot declare Kubernetes settings")
+            return self
+        if self.sandbox_policy != "kubernetes-gvisor":
+            raise ValueError("kubernetes engine requires kubernetes-gvisor policy")
+        if any(value is None for value in container_fields[:3]):
+            raise ValueError("kubernetes engine requires image, CPU, and memory limits")
+        if self.container_pids_limit is not None:
+            raise ValueError("kubernetes engine cannot declare a Docker PID limit")
+        if any(value is None for value in kubernetes_fields):
+            raise ValueError("kubernetes engine requires context, namespace, and RuntimeClass")
+        return self
 
 
 class EvalManifest(FrozenModel):
@@ -121,6 +170,11 @@ class EvalManifest(FrozenModel):
     def validate_task_identity(self) -> EvalManifest:
         if self.candidate.task_id not in self.benchmark.task_ids:
             raise ValueError("candidate task_id is absent from benchmark task_ids")
+        if self.execution.engine in {"container", "kubernetes"}:
+            assert self.execution.container_image is not None
+            image_digest = self.execution.container_image.rsplit("@", maxsplit=1)[1]
+            if self.verifier.image_digest != image_digest:
+                raise ValueError("isolated verifier image digest must match execution image")
         return self
 
 
