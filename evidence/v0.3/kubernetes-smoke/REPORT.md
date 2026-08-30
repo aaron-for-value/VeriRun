@@ -7,11 +7,15 @@
 - Kubernetes context: `kind-verirun-m2`
 - Namespace: `verirun-m2-live`
 - RuntimeClass: `gvisor`
+- Runtime handler: `runsc`
+- Kubernetes client/server: `v1.37.0` / `v1.37.0`
 - Image: `python@sha256:d09d15e60962ca365d1cd544a48773bac9d33f2fb1b00f2aa0deec78ade7dc31`
 - Python: `3.12.13`
 - Platform: `macOS-26.5.2-arm64-arm-64bit`
-- Source revision: `4b7817e959a52d92b007ebc0dcdad07ef9998efd`
+- Source revision: `36216005b9a1d75844fa4043eb9c6723f2d384c6`
 - Working tree clean at start: `True`
+
+- Node `verirun-m2-control-plane`: kubelet `v1.37.0`, runtime `containerd://2.3.4`, kernel `6.8.0-100-generic`, OS `Debian GNU/Linux 13 (trixie)`, architecture `arm64`
 
 | Case | Expected | Baseline | Replay | Semantic match |
 |---|---|---|---|---|
