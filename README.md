@@ -78,7 +78,7 @@ The control plane owns intent and durable state. The execution plane performs re
 |---|---|---|
 | Immutable manifests, hashing, structured verification, deterministic replay | v0.1 | **Released (v0.1.0)** |
 | Bounded async model gateway with cancellation and classified retries | v0.2 | **Released (v0.2.0)** |
-| Digest-pinned container development backend; restricted Kubernetes + gVisor Job contract | v0.3 | **In progress; no published Linux attack evidence** |
+| Digest-pinned container development backend; restricted Kubernetes + gVisor Job contract | v0.3 | **Verification; published local Kubernetes/gVisor attack evidence, not a release/security guarantee** |
 | Durable run state, leases, heartbeats, replay, and idempotent commit | v0.4 | Planned |
 | Ray/KubeRay execution with bounded in-flight work and failure recovery | v0.5 | Planned |
 | OpenTelemetry, capacity/chaos evidence, and statistically valid reports | v0.6 | Planned |
@@ -263,8 +263,9 @@ evidence.
 The same manifest family now also has an explicit Kubernetes Job tier: it requires a
 digest-pinned image, explicit context/namespace/`RuntimeClass`, default-deny egress
 preflight, restricted Pod settings, bounded logs, zero Job retries, and cleanup. It
-has passed a local kind/gVisor attack matrix, but is not yet a release or broad
-security claim: clean-revision public evidence remains required. See
+has passed a local kind/gVisor attack matrix with a checked-in
+[clean-revision report](evidence/v0.3/kubernetes-smoke/REPORT.md), but is not a
+release or broad security claim. See
 [`docs/ISOLATED_EXECUTION.md`](docs/ISOLATED_EXECUTION.md).
 
 Run the reproducible development-container smoke only after pre-pulling an exact

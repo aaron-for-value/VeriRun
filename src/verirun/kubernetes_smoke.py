@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import platform
+import subprocess
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -120,6 +122,70 @@ def _cases() -> tuple[KubernetesSmokeCase, ...]:
     )
 
 
+def _kubectl_json(context: str, arguments: tuple[str, ...]) -> dict[str, Any]:
+    result = subprocess.run(
+        ["kubectl", "--context", context, *arguments],
+        check=False,
+        capture_output=True,
+        timeout=15,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.decode("utf-8", errors="replace").strip()
+        raise RuntimeError(detail or f"kubectl {' '.join(arguments)} failed")
+    payload = json.loads(result.stdout)
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"kubectl {' '.join(arguments)} returned a non-object JSON payload")
+    return payload
+
+
+def kubernetes_runtime_identity(context: str, runtime_class: str) -> dict[str, Any]:
+    """Read API-visible Kubernetes and runtime identity before a live run."""
+
+    version = _kubectl_json(context, ("version", "--output=json"))
+    runtime = _kubectl_json(context, ("get", "runtimeclass", runtime_class, "-o", "json"))
+    nodes = _kubectl_json(context, ("get", "nodes", "-o", "json"))
+    handler = runtime.get("handler")
+    if not isinstance(handler, str) or not handler:
+        raise RuntimeError(f"RuntimeClass {runtime_class!r} does not declare a handler")
+    node_items = nodes.get("items")
+    if not isinstance(node_items, list) or not node_items:
+        raise RuntimeError("Kubernetes context has no readable nodes")
+    node_rows: list[dict[str, str]] = []
+    for item in node_items:
+        if not isinstance(item, dict):
+            continue
+        metadata = item.get("metadata")
+        status = item.get("status")
+        node_info = status.get("nodeInfo") if isinstance(status, dict) else None
+        name = metadata.get("name") if isinstance(metadata, dict) else None
+        if not isinstance(name, str) or not isinstance(node_info, dict):
+            continue
+        row = {"name": name}
+        for field, key in (
+            ("kubelet_version", "kubeletVersion"),
+            ("container_runtime_version", "containerRuntimeVersion"),
+            ("kernel_version", "kernelVersion"),
+            ("os_image", "osImage"),
+            ("architecture", "architecture"),
+        ):
+            value = node_info.get(key)
+            if isinstance(value, str):
+                row[field] = value
+        node_rows.append(row)
+    if not node_rows:
+        raise RuntimeError("Kubernetes context has no readable node identities")
+    client = version.get("clientVersion")
+    server = version.get("serverVersion")
+    return {
+        "kubernetes": {
+            "client_git_version": client.get("gitVersion") if isinstance(client, dict) else None,
+            "server_git_version": server.get("gitVersion") if isinstance(server, dict) else None,
+        },
+        "runtime_class": {"name": runtime_class, "handler": handler},
+        "nodes": sorted(node_rows, key=lambda row: row["name"]),
+    }
+
+
 def _manifest(
     case: KubernetesSmokeCase,
     *,
@@ -163,6 +229,9 @@ def _manifest(
 
 
 def kubernetes_smoke_markdown(summary: dict[str, Any]) -> str:
+    runtime_identity = summary["kubernetes_runtime_identity"]
+    runtime = runtime_identity["runtime_class"]
+    kubernetes = runtime_identity["kubernetes"]
     lines = [
         "# VeriRun v0.3 Kubernetes/gVisor Smoke Report",
         "",
@@ -173,15 +242,36 @@ def kubernetes_smoke_markdown(summary: dict[str, Any]) -> str:
         f"- Kubernetes context: `{summary['kubernetes_context']}`",
         f"- Namespace: `{summary['kubernetes_namespace']}`",
         f"- RuntimeClass: `{summary['kubernetes_runtime_class']}`",
+        f"- Runtime handler: `{runtime['handler']}`",
+        f"- Kubernetes client/server: `{kubernetes['client_git_version']}` / "
+        f"`{kubernetes['server_git_version']}`",
         f"- Image: `{summary['container_image']}`",
         f"- Python: `{summary['environment']['python']}`",
         f"- Platform: `{summary['environment']['platform']}`",
         f"- Source revision: `{summary['source']['revision']}`",
         f"- Working tree clean at start: `{summary['source']['working_tree_clean']}`",
         "",
-        "| Case | Expected | Baseline | Replay | Semantic match |",
-        "|---|---|---|---|---|",
     ]
+    for node in runtime_identity["nodes"]:
+        lines.append(
+            "- Node `{name}`: kubelet `{kubelet_version}`, runtime "
+            "`{container_runtime_version}`, kernel `{kernel_version}`, OS `{os_image}`, "
+            "architecture `{architecture}`".format(
+                name=node["name"],
+                kubelet_version=node.get("kubelet_version", "unknown"),
+                container_runtime_version=node.get("container_runtime_version", "unknown"),
+                kernel_version=node.get("kernel_version", "unknown"),
+                os_image=node.get("os_image", "unknown"),
+                architecture=node.get("architecture", "unknown"),
+            )
+        )
+    lines.extend(
+        [
+            "",
+            "| Case | Expected | Baseline | Replay | Semantic match |",
+            "|---|---|---|---|---|",
+        ]
+    )
     for row in summary["cases"]:
         lines.append(
             "| {name} | {expected} | {baseline} | {replay} | {matched} |".format(
@@ -229,6 +319,7 @@ def run_kubernetes_smoke(
     """Execute the v0.3 Kubernetes attack matrix twice and write evidence."""
 
     source = source_state()
+    runtime_identity = kubernetes_runtime_identity(context, runtime_class)
     output.mkdir(parents=True, exist_ok=True)
     store = ArtifactStore(output / "artifacts")
     executor = KubernetesJobExecutor()
@@ -290,6 +381,7 @@ def run_kubernetes_smoke(
         "kubernetes_context": context,
         "kubernetes_namespace": namespace,
         "kubernetes_runtime_class": runtime_class,
+        "kubernetes_runtime_identity": runtime_identity,
         "environment": {
             "python": platform.python_version(),
             "platform": platform.platform(),

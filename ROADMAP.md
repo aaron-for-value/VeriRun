@@ -2,9 +2,9 @@
 
 This roadmap turns VeriRun from a design into an evidence-backed executable evaluation and reward runtime. It is organized by capability gates, not speculative dates.
 
-**Current stage:** v0.2.0 released; v0.3 Isolated Execution is queued
+**Current stage:** v0.2.0 released; v0.3 Isolated Execution is in verification
 
-**Last updated:** 2026-08-21
+**Last updated:** 2026-08-30
 
 **Release policy:** a milestone closes only when its evidence is reproducible from the tagged revision.
 
@@ -49,7 +49,7 @@ The project reaches v1.0 only when these properties are demonstrated across supp
 | Foundation | Public contract, governance baseline, and GitHub operating model | **Verification** |
 | v0.1 — Protocol Baseline | Reproducible verification and frozen-candidate replay | **Complete (v0.1.0)** |
 | v0.2 — Async Model Gateway | Bounded model generation with correct failure and cancellation semantics | **Complete (v0.2.0)** |
-| v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | **In progress (development-container contract)** |
+| v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | **Verification (clean local Kubernetes/gVisor evidence published; release review pending)** |
 | v0.4 — Durable Control Plane | Recoverable runs with frozen verification plans, comparable cohorts, leases, heartbeats, replay, and idempotent result commit | Queued |
 | v0.5 — Distributed Executor | Bounded Ray/KubeRay execution with failure recovery | Queued |
 | v0.6 — Reliability & Evaluation Evidence | Correlated observability, capacity/chaos reports, and valid statistics | Queued |
@@ -245,8 +245,9 @@ Run untrusted candidates through explicit execution tiers and publish security e
   `RuntimeClass(handler: runsc)` contract and a nine-case baseline/replay matrix:
   timeout, bounded output, OOM, egress, root-write, privilege, source, and artifact
   probes all produced their expected classifications with no Job/Pod residue.
-  This local record is not release evidence because it was generated from a dirty
-  source tree; a clean-revision, checked-in report and CI gate remain required.
+  The checked-in [clean-revision report](evidence/v0.3/kubernetes-smoke/REPORT.md)
+  records Kubernetes/node/runtime identity, and the [CI quality gate](https://github.com/aaron-for-value/VeriRun/actions/runs/33295826876)
+  passed. This is local runtime evidence, not a tagged release or a broad security claim.
 
 ### Exit evidence
 

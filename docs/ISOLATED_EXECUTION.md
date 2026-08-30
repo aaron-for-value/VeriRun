@@ -1,7 +1,7 @@
 # Isolated execution tiers
 
-v0.3 is in development. This document records what the current container tier
-does, the evidence it has, and the stronger evidence it does not claim.
+v0.3 is in verification. This document records the execution contracts, their
+published local runtime evidence, and the stronger claims it does not make.
 
 ## Tiers and claim boundary
 
@@ -9,7 +9,7 @@ does, the evidence it has, and the stronger evidence it does not claim.
 |---|---|---|---|
 | Local | `local` / `trusted-fixtures-only` | Deterministic trusted fixtures | None; it executes a host subprocess. |
 | Development container | `container` / `development-container` | Local integration and attack-regression development | Operational risk reduction only. It is not gVisor evidence. |
-| Kubernetes + gVisor | `kubernetes` / `kubernetes-gvisor` | Isolated Job execution | Implemented contract; no stronger security claim until clean Linux evidence and attack results are published. |
+| Kubernetes + gVisor | `kubernetes` / `kubernetes-gvisor` | Isolated Job execution | Implemented contract with [clean local runtime evidence](../evidence/v0.3/kubernetes-smoke/REPORT.md); no broader security or release claim. |
 
 macOS and a default Docker runtime must never be presented as Kubernetes or gVisor
 security evidence.
@@ -84,8 +84,8 @@ three times with a short bound; a missing or unavailable log stream is
 result. If Kubernetes has already published `DeadlineExceeded` for the Pod, VeriRun
 keeps the classified `timeout` result and stores the stable log-error marker instead
 of pretending that the timeout passed. This preserves the rule that a successful
-verification must be auditable. A clean Linux/Kubernetes report is still required
-before this tier is cited as security evidence.
+verification must be auditable. The published report is local Kubernetes/gVisor
+runtime evidence, not a general security guarantee.
 
 ## Kubernetes/gVisor runtime recipe
 

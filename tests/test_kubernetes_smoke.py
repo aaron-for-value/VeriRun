@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -8,6 +9,8 @@ from verirun.artifacts import ArtifactIntegrityError
 from verirun.executor import KubernetesJobExecutor, LocalExecutor
 from verirun.kubernetes_smoke import (
     _cases,
+    _kubectl_json,
+    kubernetes_runtime_identity,
     kubernetes_smoke_markdown,
     kubernetes_smoke_succeeded,
     run_kubernetes_smoke,
@@ -46,6 +49,20 @@ def test_kubernetes_smoke_report_states_claim_and_fork_bomb_boundary() -> None:
             "kubernetes_context": "kind-test",
             "kubernetes_namespace": "verirun-test",
             "kubernetes_runtime_class": "gvisor",
+            "kubernetes_runtime_identity": {
+                "kubernetes": {"client_git_version": "v1.test", "server_git_version": "v1.test"},
+                "runtime_class": {"name": "gvisor", "handler": "runsc"},
+                "nodes": [
+                    {
+                        "name": "kind-test-control-plane",
+                        "kubelet_version": "v1.test",
+                        "container_runtime_version": "containerd://test",
+                        "kernel_version": "test",
+                        "os_image": "test",
+                        "architecture": "arm64",
+                    }
+                ],
+            },
             "container_image": "example.invalid/python@sha256:" + "a" * 64,
             "environment": {"python": "3.12", "platform": "test"},
             "source": {"revision": "test", "working_tree_clean": True},
@@ -63,6 +80,7 @@ def test_kubernetes_smoke_report_states_claim_and_fork_bomb_boundary() -> None:
 
     assert "does not claim protection" in report
     assert "does not run a destructive fork bomb" in report
+    assert "Runtime handler: `runsc`" in report
 
 
 def test_kubernetes_smoke_writes_replayable_evidence_without_a_cluster(
@@ -102,6 +120,14 @@ def test_kubernetes_smoke_writes_replayable_evidence_without_a_cluster(
         "verirun.kubernetes_smoke.source_state",
         lambda: {"revision": "clean-revision", "working_tree_clean": True, "source": "git"},
     )
+    monkeypatch.setattr(
+        "verirun.kubernetes_smoke.kubernetes_runtime_identity",
+        lambda _context, _runtime_class: {
+            "kubernetes": {"client_git_version": "v1.test", "server_git_version": "v1.test"},
+            "runtime_class": {"name": "gvisor", "handler": "runsc"},
+            "nodes": [{"name": "kind-test-control-plane"}],
+        },
+    )
 
     summary = run_kubernetes_smoke(
         tmp_path,
@@ -117,6 +143,59 @@ def test_kubernetes_smoke_writes_replayable_evidence_without_a_cluster(
         "working_tree_clean": True,
         "source": "git",
     }
+    assert summary["kubernetes_runtime_identity"]["runtime_class"]["handler"] == "runsc"
     assert (tmp_path / "summary.json").is_file()
     assert (tmp_path / "REPORT.md").is_file()
     assert (tmp_path / "cases" / "kubernetes-artifact-tamper" / "comparison.json").is_file()
+
+
+def test_kubernetes_runtime_identity_reads_version_runtime_class_and_nodes(
+    monkeypatch,
+) -> None:
+    payloads = [
+        {"clientVersion": {"gitVersion": "v1.37.0"}, "serverVersion": {"gitVersion": "v1.37.0"}},
+        {"handler": "runsc"},
+        {
+            "items": [
+                {
+                    "metadata": {"name": "kind-test-control-plane"},
+                    "status": {
+                        "nodeInfo": {
+                            "kubeletVersion": "v1.37.0",
+                            "containerRuntimeVersion": "containerd://2.3.4",
+                            "kernelVersion": "6.6",
+                            "osImage": "Debian",
+                            "architecture": "arm64",
+                        }
+                    },
+                }
+            ]
+        },
+    ]
+
+    monkeypatch.setattr("verirun.kubernetes_smoke._kubectl_json", lambda *_args: payloads.pop(0))
+
+    assert kubernetes_runtime_identity("kind-test", "gvisor") == {
+        "kubernetes": {"client_git_version": "v1.37.0", "server_git_version": "v1.37.0"},
+        "runtime_class": {"name": "gvisor", "handler": "runsc"},
+        "nodes": [
+            {
+                "name": "kind-test-control-plane",
+                "kubelet_version": "v1.37.0",
+                "container_runtime_version": "containerd://2.3.4",
+                "kernel_version": "6.6",
+                "os_image": "Debian",
+                "architecture": "arm64",
+            }
+        ],
+    }
+
+
+def test_kubectl_json_returns_a_json_object_without_a_cluster(monkeypatch) -> None:
+    def run(command, **_kwargs):
+        assert command == ["kubectl", "--context", "kind-test", "version", "--output=json"]
+        return subprocess.CompletedProcess(command, 0, stdout=b'{"ok": true}', stderr=b"")
+
+    monkeypatch.setattr("verirun.kubernetes_smoke.subprocess.run", run)
+
+    assert _kubectl_json("kind-test", ("version", "--output=json")) == {"ok": True}
