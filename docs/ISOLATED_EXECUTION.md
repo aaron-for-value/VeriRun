@@ -1,7 +1,7 @@
 # Isolated execution tiers
 
-v0.3 is in verification. This document records the execution contracts, their
-published local runtime evidence, and the stronger claims it does not make.
+v0.3.0 is released. This document records its execution contracts, narrowly scoped
+local runtime evidence, and the stronger claims it does not make.
 
 ## Tiers and claim boundary
 
@@ -9,10 +9,11 @@ published local runtime evidence, and the stronger claims it does not make.
 |---|---|---|---|
 | Local | `local` / `trusted-fixtures-only` | Deterministic trusted fixtures | None; it executes a host subprocess. |
 | Development container | `container` / `development-container` | Local integration and attack-regression development | Operational risk reduction only. It is not gVisor evidence. |
-| Kubernetes + gVisor | `kubernetes` / `kubernetes-gvisor` | Isolated Job execution | Implemented contract with [clean local runtime evidence](../evidence/v0.3/kubernetes-smoke/REPORT.md); no broader security or release claim. |
+| Kubernetes + gVisor | `kubernetes` / `kubernetes-gvisor` | Isolated Job execution | Supported only for the recorded local, single-node kind + gVisor (`runsc`) environment, with [checked-in evidence](../evidence/v0.3/kubernetes-smoke/REPORT.md) and final evidence in the [v0.3.0 release](https://github.com/aaron-for-value/VeriRun/releases/tag/v0.3.0). No broader security claim. |
 
 macOS and a default Docker runtime must never be presented as Kubernetes or gVisor
-security evidence.
+security evidence. v0.3.0 does not promise compatibility with another Kubernetes
+distribution, default Colima profile, CNI, container runtime, or production cluster.
 
 ## Development-container contract
 

@@ -2,7 +2,7 @@
 
 This roadmap turns VeriRun from a design into an evidence-backed executable evaluation and reward runtime. It is organized by capability gates, not speculative dates.
 
-**Current stage:** v0.2.0 released; v0.3 Isolated Execution is in verification
+**Current stage:** v0.3.0 released; v0.4 Durable Control Plane (M3) is in preparation
 
 **Last updated:** 2026-08-30
 
@@ -49,8 +49,8 @@ The project reaches v1.0 only when these properties are demonstrated across supp
 | Foundation | Public contract, governance baseline, and GitHub operating model | **Verification** |
 | v0.1 — Protocol Baseline | Reproducible verification and frozen-candidate replay | **Complete (v0.1.0)** |
 | v0.2 — Async Model Gateway | Bounded model generation with correct failure and cancellation semantics | **Complete (v0.2.0)** |
-| v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | **Verification (clean local Kubernetes/gVisor evidence published; release review pending)** |
-| v0.4 — Durable Control Plane | Recoverable runs with frozen verification plans, comparable cohorts, leases, heartbeats, replay, and idempotent result commit | Queued |
+| v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | **Complete (v0.3.0; narrow local kind/gVisor boundary)** |
+| v0.4 — Durable Control Plane | Recoverable runs with frozen verification plans, comparable cohorts, leases, heartbeats, replay, and idempotent result commit | **Current — M3 preparation** |
 | v0.5 — Distributed Executor | Bounded Ray/KubeRay execution with failure recovery | Queued |
 | v0.6 — Reliability & Evaluation Evidence | Correlated observability, capacity/chaos reports, and valid statistics | Queued |
 | v0.7 — Reward Runtime | Stable asynchronous verifier rewards for veRL | Queued |
@@ -228,7 +228,7 @@ Run untrusted candidates through explicit execution tiers and publish security e
 - Cleanup and duplicate-final-result handling across Job retries.
 - Attack regression suite.
 
-### M2 development status
+### Release evidence and support boundary
 
 - The manifest and CLI now support a digest-pinned development-container tier with
   no network, read-only filesystem, non-root execution, removed capabilities,
@@ -246,8 +246,14 @@ Run untrusted candidates through explicit execution tiers and publish security e
   timeout, bounded output, OOM, egress, root-write, privilege, source, and artifact
   probes all produced their expected classifications with no Job/Pod residue.
   The checked-in [clean-revision report](evidence/v0.3/kubernetes-smoke/REPORT.md)
-  records Kubernetes/node/runtime identity, and the [CI quality gate](https://github.com/aaron-for-value/VeriRun/actions/runs/33296303955)
-  passed. This is local runtime evidence, not a tagged release or a broad security claim.
+  records Kubernetes/node/runtime identity. The final clean-revision report is
+  published with [v0.3.0](https://github.com/aaron-for-value/VeriRun/releases/tag/v0.3.0),
+  and the release CI quality gate passed. This is local runtime evidence, not a broad
+  security or production claim.
+- v0.3.0 supports only the recorded local, single-node `kind` environment using
+  `RuntimeClass(handler: runsc)`. It does not claim support for other Kubernetes
+  distributions, default Docker/Colima profiles, production deployments, or absolute
+  containment against kernel, runtime, image, or control-plane compromise.
 
 ### Exit evidence
 

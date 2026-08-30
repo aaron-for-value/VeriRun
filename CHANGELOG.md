@@ -4,6 +4,23 @@ All notable VeriRun changes are documented here. The project follows [Semantic V
 
 ## Unreleased
 
+## [0.3.0] - 2026-08-30
+
+### Added
+
+- Digest-pinned development-container executor with an explicit, local-only threat
+  boundary.
+- Restricted Kubernetes Job executor with explicit context, namespace, RuntimeClass,
+  default-deny-egress preflight, bounded logs, and mandatory cleanup.
+- Local `kind` + gVisor (`RuntimeClass(handler: runsc)`) attack/replay evidence for
+  the Kubernetes tier, including runtime identity and no-residual-workload checks.
+
+### Security
+
+- Published the supported local runtime boundary and known limitations. This release
+  is not a production-sandbox, absolute-security, or cross-distribution Kubernetes
+  compatibility claim.
+
 ## [0.2.0] - 2026-08-17
 
 ### Added
