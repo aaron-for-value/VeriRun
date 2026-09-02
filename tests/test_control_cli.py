@@ -29,15 +29,16 @@ def write_json(path: Path, value: object) -> None:
 
 def test_control_cli_lifecycle(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     assert DSN is not None
+    migrate_output = tmp_path / "migration.json"
+    assert main(["control", "--dsn", DSN, "migrate", "--output", str(migrate_output)]) == 0
+    assert json.loads(migrate_output.read_text())["migration"] == "ok"
+
     with psycopg.connect(DSN) as connection:
         connection.execute(
             """TRUNCATE artifact_metadata, final_results, attempt_leases, run_tasks,
                       command_receipts, eval_runs, comparison_cohorts, verification_plans
                CASCADE"""
         )
-    migrate_output = tmp_path / "migration.json"
-    assert main(["control", "--dsn", DSN, "migrate", "--output", str(migrate_output)]) == 0
-    assert json.loads(migrate_output.read_text())["migration"] == "ok"
 
     request = PlanCompileRequest(
         task_spec=TaskSpec(task_id="task", task_family="python"),
