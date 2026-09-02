@@ -3,10 +3,10 @@
 - Succeeded: `true`
 - PostgreSQL: `16.13 (Debian 16.13-1.pgdg13+1)`
 - S3 server: `minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e`
-- Plan digest: `21c3e216026c7840bd346453f9dee2a6c8871cbcb8ae16587a7efd18adf810e0`
-- Changed plan digest: `e68010f7c98e067dbcc7f71c31fd619c93b6d8682cced59d084878c3b34707f2`
-- Artifact digest: `926aa67891b869f5026abf796a1f97ca1b3671635761ca2e565f9eb193dd04dd`
-- Source revision: `888f1957da2c9ebca2055bf17657ee9b6f85b55e`
+- Plan digest: `2f8feef11fe568effad85cff714eceb1a7947cc30507af327276fce13f6bb3ee`
+- Changed plan digest: `4375059d6323cf9e7c98b69d58fc6e646e3529c8c963c7bbd9cf84ca4b7c87cd`
+- Artifact digest: `e6ecca5823356825bd58b1734c1c0dc0b23cb8036f6819f5a0adc769b7eaef6b`
+- Source revision: `59fbf7ec570a56448a4cf8ac450ec70134b5aeff`
 - Source working tree clean: `true`
 
 ## Checks
