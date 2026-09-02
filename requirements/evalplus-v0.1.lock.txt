@@ -58,7 +58,7 @@ pandas==3.0.3
 pathspec==1.1.1
 pluggy==1.6.0
 propcache==0.5.2
-proto-plus==1.28.1
+proto-plus==1.28.3
 protobuf==5.29.6
 psutil==7.2.2
 pyarrow==25.0.0
