@@ -16,7 +16,7 @@ class ArtifactIntegrityError(RuntimeError):
 
 
 class ArtifactStore:
-    """A local SHA-256 store; S3-compatible storage is intentionally deferred."""
+    """Local SHA-256 store for direct and legacy execution paths."""
 
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()

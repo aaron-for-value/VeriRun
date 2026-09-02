@@ -9,19 +9,37 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from verirun.adapters.evalplus import EvalPlusTaskResult
+from verirun.control_plane import (
+    ArtifactMetadataRecord,
+    AttemptLease,
+    CreateRunCommand,
+    EvalRunRecord,
+    FinalResultRecord,
+    PlanCompileRequest,
+    RunInspection,
+    VerificationPlan,
+)
 from verirun.gateway import GatewayConfig, GenerationRequest, GenerationResult
 from verirun.models import EvalManifest, ReplayComparison, VerificationResult
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_DIRECTORY = ROOT / "schemas"
 MODELS: dict[str, type[BaseModel]] = {
+    "artifact-metadata-v1.json": ArtifactMetadataRecord,
+    "attempt-lease-v1.json": AttemptLease,
+    "create-run-command-v1.json": CreateRunCommand,
+    "eval-run-v1.json": EvalRunRecord,
     "eval-manifest-v1.json": EvalManifest,
     "evalplus-task-result-v1.json": EvalPlusTaskResult,
     "gateway-config-v1.json": GatewayConfig,
     "generation-request-v1.json": GenerationRequest,
     "generation-result-v1.json": GenerationResult,
+    "final-result-v1.json": FinalResultRecord,
+    "plan-compile-request-v1.json": PlanCompileRequest,
     "replay-comparison-v1.json": ReplayComparison,
+    "run-inspection-v1.json": RunInspection,
     "verification-result-v1.json": VerificationResult,
+    "verification-plan-record-v1.json": VerificationPlan,
 }
 
 

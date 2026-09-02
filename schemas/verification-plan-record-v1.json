@@ -1,0 +1,327 @@
+{
+  "$defs": {
+    "AggregationPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "config_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Config Digest",
+          "type": "string"
+        },
+        "policy_id": {
+          "minLength": 1,
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "reducer": {
+          "minLength": 1,
+          "title": "Reducer",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policy_id",
+        "version",
+        "reducer",
+        "config_digest"
+      ],
+      "title": "AggregationPolicy",
+      "type": "object"
+    },
+    "BudgetEstimate": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_count": {
+          "exclusiveMinimum": 0,
+          "title": "Candidate Count",
+          "type": "integer"
+        },
+        "expected_model_tokens": {
+          "minimum": 0,
+          "title": "Expected Model Tokens",
+          "type": "integer"
+        },
+        "expected_sandbox_cpu_seconds": {
+          "minimum": 0,
+          "title": "Expected Sandbox Cpu Seconds",
+          "type": "number"
+        },
+        "max_concurrency": {
+          "exclusiveMinimum": 0,
+          "title": "Max Concurrency",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "candidate_count",
+        "expected_model_tokens",
+        "expected_sandbox_cpu_seconds",
+        "max_concurrency"
+      ],
+      "title": "BudgetEstimate",
+      "type": "object"
+    },
+    "EvaluationIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "required_verifier_tags": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Required Verifier Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "EvaluationIntent",
+      "type": "object"
+    },
+    "PlanState": {
+      "enum": [
+        "draft",
+        "validated",
+        "frozen",
+        "superseded",
+        "invalid"
+      ],
+      "title": "PlanState",
+      "type": "string"
+    },
+    "TaskSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "task_family": {
+          "minLength": 1,
+          "title": "Task Family",
+          "type": "string"
+        },
+        "task_id": {
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "verifier_tags": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Verifier Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "task_id",
+        "task_family"
+      ],
+      "title": "TaskSpec",
+      "type": "object"
+    },
+    "VerificationPlanSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "aggregation_policy": {
+          "$ref": "#/$defs/AggregationPolicy"
+        },
+        "budget_estimate": {
+          "$ref": "#/$defs/BudgetEstimate"
+        },
+        "comparison_cohort_id": {
+          "minLength": 1,
+          "title": "Comparison Cohort Id",
+          "type": "string"
+        },
+        "evaluation_intent": {
+          "$ref": "#/$defs/EvaluationIntent"
+        },
+        "input_evidence_digests": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Input Evidence Digests",
+          "type": "array"
+        },
+        "policy_revision": {
+          "minLength": 1,
+          "title": "Policy Revision",
+          "type": "string"
+        },
+        "required_evidence": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Required Evidence",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "verirun.verification-plan/v1",
+          "default": "verirun.verification-plan/v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "task_spec": {
+          "$ref": "#/$defs/TaskSpec"
+        },
+        "verifier_graph": {
+          "items": {
+            "$ref": "#/$defs/VerifierNode"
+          },
+          "title": "Verifier Graph",
+          "type": "array"
+        }
+      },
+      "required": [
+        "task_spec",
+        "evaluation_intent",
+        "verifier_graph",
+        "required_evidence",
+        "aggregation_policy",
+        "policy_revision",
+        "input_evidence_digests",
+        "comparison_cohort_id",
+        "budget_estimate"
+      ],
+      "title": "VerificationPlanSpec",
+      "type": "object"
+    },
+    "VerifierNode": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "minLength": 1,
+          "title": "Adapter",
+          "type": "string"
+        },
+        "config_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Config Digest",
+          "type": "string"
+        },
+        "expected_model_tokens": {
+          "minimum": 0,
+          "title": "Expected Model Tokens",
+          "type": "integer"
+        },
+        "expected_sandbox_cpu_seconds": {
+          "minimum": 0,
+          "title": "Expected Sandbox Cpu Seconds",
+          "type": "number"
+        },
+        "image_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Image Digest",
+          "type": "string"
+        },
+        "required_evidence": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Required Evidence",
+          "type": "array"
+        },
+        "verifier_id": {
+          "minLength": 1,
+          "title": "Verifier Id",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "verifier_id",
+        "adapter",
+        "version",
+        "config_digest",
+        "image_digest",
+        "required_evidence",
+        "expected_model_tokens",
+        "expected_sandbox_cpu_seconds"
+      ],
+      "title": "VerifierNode",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "plan_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Plan Digest",
+      "type": "string"
+    },
+    "plan_id": {
+      "minLength": 1,
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "revision": {
+      "exclusiveMinimum": 0,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "verirun.verification-plan-record/v1",
+      "default": "verirun.verification-plan-record/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "spec": {
+      "$ref": "#/$defs/VerificationPlanSpec"
+    },
+    "state": {
+      "$ref": "#/$defs/PlanState"
+    },
+    "state_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "State Reason"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "plan_id",
+    "revision",
+    "plan_digest",
+    "spec",
+    "state",
+    "created_at",
+    "updated_at"
+  ],
+  "title": "VerificationPlan",
+  "type": "object"
+}

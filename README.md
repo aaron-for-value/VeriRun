@@ -79,7 +79,7 @@ The control plane owns intent and durable state. The execution plane performs re
 | Immutable manifests, hashing, structured verification, deterministic replay | v0.1 | **Released (v0.1.0)** |
 | Bounded async model gateway with cancellation and classified retries | v0.2 | **Released (v0.2.0)** |
 | Digest-pinned container development backend; restricted Kubernetes + gVisor Job contract | v0.3 | **Released (v0.3.0); local kind/gVisor evidence only** |
-| Durable run state, leases, heartbeats, replay, and idempotent commit | v0.4 | **Current — M3 preparation** |
+| Durable run state, frozen plans, leases, recovery, S3 artifacts, and idempotent commit | v0.4 | **Verification — M3 implemented; release evidence pending** |
 | Ray/KubeRay execution with bounded in-flight work and failure recovery | v0.5 | Planned |
 | OpenTelemetry, capacity/chaos evidence, and statistically valid reports | v0.6 | Planned |
 | veRL asynchronous reward integration | v0.7 | Planned |
@@ -222,14 +222,25 @@ Infrastructure is added only when the milestone that owns its contract can also 
 
 ## Installation and development
 
-The supported v0.1 development environment is Python 3.12 in a project-local environment:
+The supported development environment is Python 3.12 in a project-local environment:
 
 ```bash
 conda create --prefix .venv python=3.12 pip -y
 ./.venv/bin/python -m pip install -r requirements/core-dev.lock.txt
 ./.venv/bin/python -m pip install -e . --no-deps
-make check
+make lint typecheck schemas test-unit build smoke
 ```
+
+The PostgreSQL and S3-compatible M3 interfaces use the separately declared
+control-plane dependency set:
+
+```bash
+./.venv/bin/python -m pip install -e '.[control-plane]'
+```
+
+The full `make check` coverage gate includes live PostgreSQL and S3 integration tests.
+Start the pinned local fixture and export the test variables described in the
+[control-plane guide](docs/CONTROL_PLANE.md) before running it.
 
 Run the trusted synthetic protocol and replay smoke directly with:
 
@@ -247,9 +258,9 @@ The pinned EvalPlus adapter remains optional because its upstream dependency tre
 
 The EvalPlus command runs a labeled three-task HumanEval+ compatibility subset twice. It does not produce a standard benchmark score. See [BENCHMARK_PROTOCOL.md](BENCHMARK_PROTOCOL.md) for the exact claim boundary.
 
-## v0.3 development-container tier
+## v0.3 isolated-execution tiers
 
-M2 has begun the isolated-execution work with a digest-pinned Docker development
+v0.3 introduced the isolated-execution work with a digest-pinned Docker development
 tier. It rejects mutable images, disables networking, uses a read-only filesystem,
 runs as non-root with no capabilities, applies memory/PID limits, and treats failed
 container cleanup as an infrastructure error. The exact threat model, command
@@ -296,6 +307,25 @@ written under `.verirun/evidence/v0.3/kubernetes-smoke/`; use `make
 evidence-kubernetes` only to refresh checked-in evidence from a clean revision.
 
 EvalPlus v0.3.1's memory `setrlimit` path is incompatible with Darwin on the current supported macOS environment. For this built-in deterministic trusted smoke only, macOS evidence is run with `EVALPLUS_MAX_MEMORY_BYTES=-1`; the setting is recorded in the report. Linux verification keeps the upstream default. Neither path is sandbox evidence.
+
+## v0.4 durable control plane
+
+M3 now has an implementation under release verification. It adds a deterministic,
+versioned `VerificationPlan`; PostgreSQL-backed plan/run/task/attempt/result/command and
+artifact metadata; lease, heartbeat, expiry and takeover semantics; caller idempotency
+keys; cohort preflight/splitting; and SHA-256-addressed S3-compatible artifact storage.
+
+Only a validated and frozen plan can be scheduled. Candidate/model output is excluded
+from plan selection, and every durable task, attempt, and final result retains the
+same plan digest. Attempts remain at least once; the database enforces one authoritative
+result for `run + task + candidate + plan digest` and rejects changed repeated payloads.
+
+The typed CLI starts at `verirun control`. The full architecture, lifecycle, command
+examples, recovery procedure, and limitations are in the
+[durable control-plane guide](docs/CONTROL_PLANE.md). The checked-in
+[M3 recovery report](evidence/v0.4/control-plane/REPORT.md) covers a local PostgreSQL
+16 + MinIO smoke. Until v0.4.0 is tagged and its final CI/evidence is published, the
+latest supported release remains v0.3.0.
 
 ## v0.1 evidence
 

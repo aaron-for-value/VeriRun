@@ -9,6 +9,7 @@ from pathlib import Path
 from verirun.artifacts import ArtifactStore
 from verirun.canonical import content_hash, write_canonical_json
 from verirun.container_smoke import container_smoke_succeeded, run_container_smoke
+from verirun.control_cli import add_control_parser
 from verirun.evalplus_m0 import (
     STANDARD_DATASETS,
     STANDARD_RECIPES,
@@ -195,6 +196,8 @@ def _kubernetes_smoke(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="verirun")
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    add_control_parser(subparsers)
 
     smoke = subparsers.add_parser("smoke", help="run trusted v0.1 synthetic fixtures twice")
     smoke.add_argument("--output", type=Path, default=Path("evidence/v0.1/synthetic"))

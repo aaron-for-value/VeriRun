@@ -1,0 +1,189 @@
+{
+  "$defs": {
+    "EvalRunRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "cohort_id": {
+          "minLength": 1,
+          "title": "Cohort Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "plan_id": {
+          "minLength": 1,
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "plan_revision": {
+          "exclusiveMinimum": 0,
+          "title": "Plan Revision",
+          "type": "integer"
+        },
+        "requested_cohort_id": {
+          "minLength": 1,
+          "title": "Requested Cohort Id",
+          "type": "string"
+        },
+        "run_id": {
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "verirun.eval-run/v1",
+          "default": "verirun.eval-run/v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Run Id"
+        },
+        "state": {
+          "$ref": "#/$defs/RunState"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "verification_plan_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Verification Plan Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "requested_cohort_id",
+        "cohort_id",
+        "plan_id",
+        "plan_revision",
+        "verification_plan_digest",
+        "state",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "EvalRunRecord",
+      "type": "object"
+    },
+    "RunState": {
+      "enum": [
+        "pending",
+        "running",
+        "cancelled",
+        "completed"
+      ],
+      "title": "RunState",
+      "type": "string"
+    },
+    "RunTaskRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Candidate Hash",
+          "type": "string"
+        },
+        "candidate_id": {
+          "minLength": 1,
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "current_attempt_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Current Attempt Id"
+        },
+        "run_id": {
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/RunTaskState"
+        },
+        "task_id": {
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "verification_plan_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Verification Plan Digest",
+          "type": "string"
+        },
+        "verification_plan_id": {
+          "minLength": 1,
+          "title": "Verification Plan Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "task_id",
+        "candidate_id",
+        "candidate_hash",
+        "verification_plan_id",
+        "verification_plan_digest",
+        "state"
+      ],
+      "title": "RunTaskRecord",
+      "type": "object"
+    },
+    "RunTaskState": {
+      "enum": [
+        "queued",
+        "leased",
+        "cancelled",
+        "completed"
+      ],
+      "title": "RunTaskState",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "run": {
+      "$ref": "#/$defs/EvalRunRecord"
+    },
+    "schema_version": {
+      "const": "verirun.run-inspection/v1",
+      "default": "verirun.run-inspection/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "tasks": {
+      "items": {
+        "$ref": "#/$defs/RunTaskRecord"
+      },
+      "title": "Tasks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "run",
+    "tasks"
+  ],
+  "title": "RunInspection",
+  "type": "object"
+}

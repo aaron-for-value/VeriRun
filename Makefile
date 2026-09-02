@@ -1,4 +1,4 @@
-.PHONY: build check container-smoke evidence-container evidence-evalplus evidence-evalplus-m0 evidence-gateway evidence-kubernetes evidence-synthetic evalplus-m0 evalplus-smoke format gateway-smoke kubernetes-smoke lint schemas smoke test typecheck
+.PHONY: build check container-smoke control-plane-smoke evidence-container evidence-control-plane evidence-evalplus evidence-evalplus-m0 evidence-gateway evidence-kubernetes evidence-synthetic evalplus-m0 evalplus-smoke format gateway-smoke kubernetes-smoke lint schemas smoke test test-unit typecheck
 
 PYTHON := .venv/bin/python
 
@@ -16,7 +16,14 @@ schemas:
 	$(PYTHON) scripts/export_schemas.py --check
 
 test:
+	@test -n "$(VERIRUN_TEST_POSTGRES_DSN)" || (echo "VERIRUN_TEST_POSTGRES_DSN is required for the full coverage gate"; exit 1)
+	@test -n "$(VERIRUN_TEST_S3_ENDPOINT)" || (echo "VERIRUN_TEST_S3_ENDPOINT is required for the full coverage gate"; exit 1)
+	@test -n "$(VERIRUN_TEST_S3_ACCESS_KEY)" || (echo "VERIRUN_TEST_S3_ACCESS_KEY is required for the full coverage gate"; exit 1)
+	@test -n "$(VERIRUN_TEST_S3_SECRET_KEY)" || (echo "VERIRUN_TEST_S3_SECRET_KEY is required for the full coverage gate"; exit 1)
 	$(PYTHON) -m pytest --cov=verirun --cov-report=term-missing
+
+test-unit:
+	$(PYTHON) -m pytest -q
 
 build:
 	$(PYTHON) -m build
@@ -44,6 +51,14 @@ kubernetes-smoke:
 	test -n "$(VERIRUN_KUBERNETES_RUNTIME_CLASS)"
 	$(PYTHON) -m verirun kubernetes-smoke --image "$(VERIRUN_CONTAINER_IMAGE)" --kubernetes-context "$(VERIRUN_KUBERNETES_CONTEXT)" --kubernetes-namespace "$(VERIRUN_KUBERNETES_NAMESPACE)" --kubernetes-runtime-class "$(VERIRUN_KUBERNETES_RUNTIME_CLASS)" --output .verirun/evidence/v0.3/kubernetes-smoke
 
+control-plane-smoke:
+	@test -n "$(VERIRUN_POSTGRES_DSN)"
+	@test -n "$(VERIRUN_S3_ENDPOINT)"
+	@test -n "$(VERIRUN_S3_ACCESS_KEY)"
+	@test -n "$(VERIRUN_S3_SECRET_KEY)"
+	@test -n "$(VERIRUN_S3_SERVER_IDENTITY)"
+	$(PYTHON) -m verirun control smoke --s3-endpoint "$(VERIRUN_S3_ENDPOINT)" --s3-server-identity "$(VERIRUN_S3_SERVER_IDENTITY)" --no-s3-secure --output .verirun/evidence/v0.4/control-plane
+
 evidence-synthetic:
 	$(PYTHON) -m verirun smoke --output evidence/v0.1/synthetic
 
@@ -66,5 +81,13 @@ evidence-kubernetes:
 	test -n "$(VERIRUN_KUBERNETES_NAMESPACE)"
 	test -n "$(VERIRUN_KUBERNETES_RUNTIME_CLASS)"
 	$(PYTHON) -m verirun kubernetes-smoke --image "$(VERIRUN_CONTAINER_IMAGE)" --kubernetes-context "$(VERIRUN_KUBERNETES_CONTEXT)" --kubernetes-namespace "$(VERIRUN_KUBERNETES_NAMESPACE)" --kubernetes-runtime-class "$(VERIRUN_KUBERNETES_RUNTIME_CLASS)" --output evidence/v0.3/kubernetes-smoke
+
+evidence-control-plane:
+	@test -n "$(VERIRUN_POSTGRES_DSN)"
+	@test -n "$(VERIRUN_S3_ENDPOINT)"
+	@test -n "$(VERIRUN_S3_ACCESS_KEY)"
+	@test -n "$(VERIRUN_S3_SECRET_KEY)"
+	@test -n "$(VERIRUN_S3_SERVER_IDENTITY)"
+	$(PYTHON) -m verirun control smoke --s3-endpoint "$(VERIRUN_S3_ENDPOINT)" --s3-server-identity "$(VERIRUN_S3_SERVER_IDENTITY)" --no-s3-secure --output evidence/v0.4/control-plane
 
 check: lint typecheck schemas test build smoke

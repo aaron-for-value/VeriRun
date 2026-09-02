@@ -1,0 +1,100 @@
+{
+  "$defs": {
+    "RunTaskInput": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Candidate Hash",
+          "type": "string"
+        },
+        "candidate_id": {
+          "minLength": 1,
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "task_id": {
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "candidate_id",
+        "candidate_hash"
+      ],
+      "title": "RunTaskInput",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "idempotency_key": {
+      "minLength": 1,
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "plan_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Plan Digest",
+      "type": "string"
+    },
+    "plan_id": {
+      "minLength": 1,
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "plan_revision": {
+      "exclusiveMinimum": 0,
+      "title": "Plan Revision",
+      "type": "integer"
+    },
+    "requested_cohort_id": {
+      "minLength": 1,
+      "title": "Requested Cohort Id",
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "verirun.create-run-command/v1",
+      "default": "verirun.create-run-command/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Run Id"
+    },
+    "tasks": {
+      "items": {
+        "$ref": "#/$defs/RunTaskInput"
+      },
+      "title": "Tasks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "idempotency_key",
+    "run_id",
+    "requested_cohort_id",
+    "plan_id",
+    "plan_revision",
+    "plan_digest",
+    "tasks"
+  ],
+  "title": "CreateRunCommand",
+  "type": "object"
+}

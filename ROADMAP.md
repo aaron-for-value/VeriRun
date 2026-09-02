@@ -2,9 +2,9 @@
 
 This roadmap turns VeriRun from a design into an evidence-backed executable evaluation and reward runtime. It is organized by capability gates, not speculative dates.
 
-**Current stage:** v0.3.0 released; v0.4 Durable Control Plane (M3) is in preparation
+**Current stage:** v0.4 Durable Control Plane (M3) implementation is complete; release verification is in progress
 
-**Last updated:** 2026-08-30
+**Last updated:** 2026-09-02
 
 **Release policy:** a milestone closes only when its evidence is reproducible from the tagged revision.
 
@@ -50,7 +50,7 @@ The project reaches v1.0 only when these properties are demonstrated across supp
 | v0.1 — Protocol Baseline | Reproducible verification and frozen-candidate replay | **Complete (v0.1.0)** |
 | v0.2 — Async Model Gateway | Bounded model generation with correct failure and cancellation semantics | **Complete (v0.2.0)** |
 | v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | **Complete (v0.3.0; narrow local kind/gVisor boundary)** |
-| v0.4 — Durable Control Plane | Recoverable runs with frozen verification plans, comparable cohorts, leases, heartbeats, replay, and idempotent result commit | **Current — M3 preparation** |
+| v0.4 — Durable Control Plane | Recoverable runs with frozen verification plans, comparable cohorts, leases, heartbeats, replay, and idempotent result commit | **Verification — implementation and local evidence complete** |
 | v0.5 — Distributed Executor | Bounded Ray/KubeRay execution with failure recovery | Queued |
 | v0.6 — Reliability & Evaluation Evidence | Correlated observability, capacity/chaos reports, and valid statistics | Queued |
 | v0.7 — Reward Runtime | Stable asynchronous verifier rewards for veRL | Queued |
@@ -274,6 +274,15 @@ Run untrusted candidates through explicit execution tiers and publish security e
 ### Outcome
 
 Create, inspect, cancel, resume, and replay evaluation runs that survive process failure without duplicate final results or silently changing their verification contract. A comparison cohort uses one frozen verification plan before its candidates are scheduled.
+
+**Implementation status (2026-09-02):** the typed Python/CLI surface, PostgreSQL
+repository, deterministic frozen-plan compiler, lease/reclaim state machine,
+effectively-once final commit, cohort guard, and S3-compatible content-addressed store
+are implemented. The [architecture and recovery guide](docs/CONTROL_PLANE.md),
+[lifecycle ADR](docs/adr/0003-frozen-verification-plans-and-durable-commit.md), public
+schemas, and [local recovery smoke](evidence/v0.4/control-plane/REPORT.md) are present.
+The milestone remains in Verification until the evidence is regenerated from the final
+clean revision and the corresponding CI run and v0.4.0 release are published.
 
 ### Scope
 

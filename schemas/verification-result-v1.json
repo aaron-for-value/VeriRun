@@ -82,6 +82,32 @@
           "minLength": 1,
           "title": "Task Id",
           "type": "string"
+        },
+        "verification_plan_digest": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verification Plan Digest"
+        },
+        "verification_plan_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verification Plan Id"
         }
       },
       "required": [

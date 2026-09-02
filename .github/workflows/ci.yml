@@ -14,6 +14,25 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      VERIRUN_TEST_POSTGRES_DSN: postgresql://verirun:verirun-test-only@127.0.0.1:5432/verirun
+      VERIRUN_TEST_S3_ENDPOINT: 127.0.0.1:9000
+      VERIRUN_TEST_S3_ACCESS_KEY: verirun-test
+      VERIRUN_TEST_S3_SECRET_KEY: verirun-test-secret
+    services:
+      postgres:
+        image: postgres@sha256:5d143123fdf80462d1778cd4f24b9f7ca13c87174bca19141fb194c5a1ebca59
+        env:
+          POSTGRES_USER: verirun
+          POSTGRES_PASSWORD: verirun-test-only
+          POSTGRES_DB: verirun
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U verirun -d verirun"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,6 +43,22 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check -r requirements/core-dev.lock.txt
           python -m pip install --disable-pip-version-check -e . --no-deps
+      - name: Start S3-compatible test store
+        run: |
+          docker run --detach --name verirun-m3-minio \
+            --env MINIO_ROOT_USER="$VERIRUN_TEST_S3_ACCESS_KEY" \
+            --env MINIO_ROOT_PASSWORD="$VERIRUN_TEST_S3_SECRET_KEY" \
+            --publish 127.0.0.1:9000:9000 \
+            minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e \
+            server /data
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:9000/minio/health/live; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs verirun-m3-minio
+          exit 1
       - name: Lint
         run: python -m ruff check .
       - name: Format check
@@ -40,3 +75,14 @@ jobs:
         run: python -m verirun smoke --output .verirun/evidence/v0.1/synthetic
       - name: Run deterministic v0.2 gateway smoke
         run: python -m verirun gateway-smoke --output .verirun/evidence/v0.2/gateway-smoke
+      - name: Run M3 PostgreSQL and S3 recovery smoke
+        env:
+          VERIRUN_POSTGRES_DSN: ${{ env.VERIRUN_TEST_POSTGRES_DSN }}
+          VERIRUN_S3_ACCESS_KEY: ${{ env.VERIRUN_TEST_S3_ACCESS_KEY }}
+          VERIRUN_S3_SECRET_KEY: ${{ env.VERIRUN_TEST_S3_SECRET_KEY }}
+        run: >-
+          python -m verirun control smoke
+          --s3-endpoint "$VERIRUN_TEST_S3_ENDPOINT"
+          --s3-server-identity "minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e"
+          --no-s3-secure
+          --output .verirun/evidence/v0.4/control-plane

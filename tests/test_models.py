@@ -1,9 +1,18 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 import pytest
 from pydantic import ValidationError
 
-from verirun.models import ArtifactRef, BenchmarkSpec, ExecutionSpec, VerificationStatus
+from verirun.models import (
+    ArtifactRef,
+    AttemptState,
+    BenchmarkSpec,
+    ExecutionSpec,
+    TaskAttempt,
+    VerificationStatus,
+)
 
 
 def artifact() -> ArtifactRef:
@@ -56,6 +65,20 @@ def test_status_values_are_stable() -> None:
         "policy_violation",
         "infra_error",
     }
+
+
+def test_task_attempt_requires_plan_id_and_digest_as_a_pair() -> None:
+    with pytest.raises(ValidationError, match="declared together"):
+        TaskAttempt(
+            attempt_id="attempt",
+            run_id="run",
+            task_id="task",
+            candidate_id="candidate",
+            verification_plan_id="plan",
+            state=AttemptState.FINISHED,
+            started_at=datetime(2026, 9, 2, tzinfo=UTC),
+            finished_at=datetime(2026, 9, 2, tzinfo=UTC),
+        )
 
 
 @pytest.mark.parametrize("algorithm,length", [("md5", 32), ("sha256", 64)])

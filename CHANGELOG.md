@@ -4,6 +4,27 @@ All notable VeriRun changes are documented here. The project follows [Semantic V
 
 ## Unreleased
 
+### Added
+
+- Deterministic, versioned `VerificationPlan` compilation and lifecycle with frozen
+  verifier/evidence/aggregation/budget inputs and automatic comparison-cohort splitting.
+- PostgreSQL-backed run, task, lease, command, final-result, and artifact metadata with
+  restart recovery, heartbeat/reclaim, immutable idempotency receipts, and one
+  authoritative result per run/task/candidate/plan digest.
+- S3-compatible SHA-256 artifact storage, typed `verirun control` lifecycle commands,
+  public control-plane JSON Schemas, and local PostgreSQL + MinIO recovery evidence.
+
+### Changed
+
+- Legacy v1 task-attempt/result records may now carry an optional paired verification
+  plan ID and digest; the durable M3 path always records the plan lineage in its own
+  task, lease, and final-result records.
+
+### Security
+
+- M3 makes no exactly-once execution, multi-tenant authorization, database failover,
+  object-store outage tolerance, or production-readiness claim.
+
 ## [0.3.0] - 2026-08-30
 
 ### Added

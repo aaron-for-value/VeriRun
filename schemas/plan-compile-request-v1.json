@@ -1,0 +1,243 @@
+{
+  "$defs": {
+    "AggregationPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "config_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Config Digest",
+          "type": "string"
+        },
+        "policy_id": {
+          "minLength": 1,
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "reducer": {
+          "minLength": 1,
+          "title": "Reducer",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policy_id",
+        "version",
+        "reducer",
+        "config_digest"
+      ],
+      "title": "AggregationPolicy",
+      "type": "object"
+    },
+    "EvaluationIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "required_verifier_tags": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Required Verifier Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "EvaluationIntent",
+      "type": "object"
+    },
+    "TaskSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "task_family": {
+          "minLength": 1,
+          "title": "Task Family",
+          "type": "string"
+        },
+        "task_id": {
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "verifier_tags": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Verifier Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "task_id",
+        "task_family"
+      ],
+      "title": "TaskSpec",
+      "type": "object"
+    },
+    "VerifierCatalogEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "minLength": 1,
+          "title": "Adapter",
+          "type": "string"
+        },
+        "config_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Config Digest",
+          "type": "string"
+        },
+        "expected_model_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Expected Model Tokens",
+          "type": "integer"
+        },
+        "expected_sandbox_cpu_seconds": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Expected Sandbox Cpu Seconds",
+          "type": "number"
+        },
+        "image_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Image Digest",
+          "type": "string"
+        },
+        "intents": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Intents",
+          "type": "array"
+        },
+        "priority": {
+          "default": 0,
+          "title": "Priority",
+          "type": "integer"
+        },
+        "required_evidence": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Required Evidence",
+          "type": "array"
+        },
+        "tags": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "task_families": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Task Families",
+          "type": "array"
+        },
+        "verifier_id": {
+          "minLength": 1,
+          "title": "Verifier Id",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "verifier_id",
+        "task_families",
+        "intents",
+        "adapter",
+        "version",
+        "config_digest",
+        "image_digest",
+        "required_evidence"
+      ],
+      "title": "VerifierCatalogEntry",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "aggregation_policy": {
+      "$ref": "#/$defs/AggregationPolicy"
+    },
+    "candidate_count": {
+      "exclusiveMinimum": 0,
+      "title": "Candidate Count",
+      "type": "integer"
+    },
+    "comparison_cohort_id": {
+      "minLength": 1,
+      "title": "Comparison Cohort Id",
+      "type": "string"
+    },
+    "evaluation_intent": {
+      "$ref": "#/$defs/EvaluationIntent"
+    },
+    "input_evidence_digests": {
+      "default": [],
+      "items": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "title": "Input Evidence Digests",
+      "type": "array"
+    },
+    "max_concurrency": {
+      "exclusiveMinimum": 0,
+      "title": "Max Concurrency",
+      "type": "integer"
+    },
+    "policy_revision": {
+      "minLength": 1,
+      "title": "Policy Revision",
+      "type": "string"
+    },
+    "task_spec": {
+      "$ref": "#/$defs/TaskSpec"
+    },
+    "verifier_catalog": {
+      "items": {
+        "$ref": "#/$defs/VerifierCatalogEntry"
+      },
+      "title": "Verifier Catalog",
+      "type": "array"
+    }
+  },
+  "required": [
+    "task_spec",
+    "evaluation_intent",
+    "verifier_catalog",
+    "aggregation_policy",
+    "policy_revision",
+    "comparison_cohort_id",
+    "candidate_count",
+    "max_concurrency"
+  ],
+  "title": "PlanCompileRequest",
+  "type": "object"
+}

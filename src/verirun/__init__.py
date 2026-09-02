@@ -1,5 +1,22 @@
 """VeriRun protocol and execution runtime."""
 
+from verirun.control_plane import (
+    AggregationPolicy,
+    AttemptLease,
+    CreateRunCommand,
+    EvalRunRecord,
+    EvaluationIntent,
+    FailureDomain,
+    FinalResultRecord,
+    InMemoryControlPlane,
+    PlanCompileRequest,
+    PlanState,
+    RunTaskInput,
+    TaskSpec,
+    VerificationPlan,
+    VerifierCatalogEntry,
+    compile_verification_plan,
+)
 from verirun.gateway import (
     AsyncModelGateway,
     GatewayConfig,
@@ -24,24 +41,39 @@ from verirun.models import (
 )
 
 __all__ = [
+    "AggregationPolicy",
     "ArtifactRef",
     "AsyncModelGateway",
+    "AttemptLease",
     "BenchmarkSpec",
     "Candidate",
+    "CreateRunCommand",
     "EvalManifest",
+    "EvalRunRecord",
+    "EvaluationIntent",
     "ExecutionSpec",
+    "FailureDomain",
+    "FinalResultRecord",
     "GatewayConfig",
     "GatewayErrorClass",
     "GenerationRequest",
     "GenerationResult",
     "GenerationSpec",
     "GenerationStatus",
+    "InMemoryControlPlane",
     "ModelSpec",
+    "PlanCompileRequest",
+    "PlanState",
     "ReplayComparison",
+    "RunTaskInput",
     "TaskAttempt",
+    "TaskSpec",
+    "VerificationPlan",
     "VerificationResult",
     "VerificationStatus",
+    "VerifierCatalogEntry",
     "VerifierSpec",
+    "compile_verification_plan",
 ]
 
-__version__ = "0.3.0"
+__version__ = "0.4.0.dev0"

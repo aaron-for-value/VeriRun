@@ -1,0 +1,51 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "kind": {
+      "minLength": 1,
+      "title": "Kind",
+      "type": "string"
+    },
+    "media_type": {
+      "minLength": 1,
+      "title": "Media Type",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "verirun.artifact-metadata/v1",
+      "default": "verirun.artifact-metadata/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "size_bytes": {
+      "minimum": 0,
+      "title": "Size Bytes",
+      "type": "integer"
+    },
+    "storage_uri": {
+      "minLength": 1,
+      "title": "Storage Uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "sha256",
+    "kind",
+    "size_bytes",
+    "media_type",
+    "storage_uri",
+    "created_at"
+  ],
+  "title": "ArtifactMetadataRecord",
+  "type": "object"
+}

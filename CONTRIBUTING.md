@@ -2,7 +2,7 @@
 
 Thank you for helping build trustworthy executable evaluation and reward infrastructure.
 
-VeriRun is currently in foundation and v0.1 development. Contracts may evolve quickly, but correctness, provenance, security boundaries, and honest claims are non-negotiable.
+VeriRun is pre-alpha; v0.4/M3 is under release verification. Contracts may evolve quickly, but correctness, provenance, security boundaries, and honest claims are non-negotiable.
 
 ## Before opening a pull request
 

@@ -183,6 +183,8 @@ class TaskAttempt(FrozenModel):
     run_id: NonEmpty
     task_id: NonEmpty
     candidate_id: NonEmpty
+    verification_plan_id: NonEmpty | None = None
+    verification_plan_digest: Sha256 | None = None
     state: AttemptState
     started_at: datetime
     finished_at: datetime
@@ -193,6 +195,8 @@ class TaskAttempt(FrozenModel):
             raise ValueError("attempt timestamps must be timezone-aware")
         if self.finished_at < self.started_at:
             raise ValueError("attempt finished_at cannot precede started_at")
+        if (self.verification_plan_id is None) != (self.verification_plan_digest is None):
+            raise ValueError("verification plan ID and digest must be declared together")
         return self
 
 
@@ -227,6 +231,8 @@ class VerificationResult(FrozenModel):
             "run_id": self.attempt.run_id,
             "task_id": self.attempt.task_id,
             "candidate_id": self.attempt.candidate_id,
+            "verification_plan_id": self.attempt.verification_plan_id,
+            "verification_plan_digest": self.attempt.verification_plan_digest,
             "status": self.status.value,
             "error_class": self.error_class,
             "error_message": self.error_message,
