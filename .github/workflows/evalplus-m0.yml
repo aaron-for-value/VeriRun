@@ -24,7 +24,7 @@ jobs:
         run: python -m verirun evalplus-m0 --output evidence/m0/evalplus
       - name: Upload M0 evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: verirun-m0-evalplus
           path: evidence/m0/evalplus
