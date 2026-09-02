@@ -79,7 +79,7 @@ The control plane owns intent and durable state. The execution plane performs re
 | Immutable manifests, hashing, structured verification, deterministic replay | v0.1 | **Released (v0.1.0)** |
 | Bounded async model gateway with cancellation and classified retries | v0.2 | **Released (v0.2.0)** |
 | Digest-pinned container development backend; restricted Kubernetes + gVisor Job contract | v0.3 | **Released (v0.3.0); local kind/gVisor evidence only** |
-| Durable run state, frozen plans, leases, recovery, S3 artifacts, and idempotent commit | v0.4 | **Verification — M3 implemented; release evidence pending** |
+| Durable run state, frozen plans, leases, recovery, S3 artifacts, and idempotent commit | v0.4 | **Released (v0.4.0); local PostgreSQL/MinIO evidence** |
 | Ray/KubeRay execution with bounded in-flight work and failure recovery | v0.5 | Planned |
 | OpenTelemetry, capacity/chaos evidence, and statistically valid reports | v0.6 | Planned |
 | veRL asynchronous reward integration | v0.7 | Planned |
@@ -310,7 +310,7 @@ EvalPlus v0.3.1's memory `setrlimit` path is incompatible with Darwin on the cur
 
 ## v0.4 durable control plane
 
-M3 now has an implementation under release verification. It adds a deterministic,
+Released in v0.4.0, M3 adds a deterministic,
 versioned `VerificationPlan`; PostgreSQL-backed plan/run/task/attempt/result/command and
 artifact metadata; lease, heartbeat, expiry and takeover semantics; caller idempotency
 keys; cohort preflight/splitting; and SHA-256-addressed S3-compatible artifact storage.
@@ -324,8 +324,8 @@ The typed CLI starts at `verirun control`. The full architecture, lifecycle, com
 examples, recovery procedure, and limitations are in the
 [durable control-plane guide](docs/CONTROL_PLANE.md). The checked-in
 [M3 recovery report](evidence/v0.4/control-plane/REPORT.md) covers a local PostgreSQL
-16 + MinIO smoke. Until v0.4.0 is tagged and its final CI/evidence is published, the
-latest supported release remains v0.3.0.
+16.13 + MinIO smoke. Its support and claim boundaries are summarized in the
+[v0.4.0 release notes](docs/releases/v0.4.0.md). The latest supported release is v0.4.0.
 
 ## v0.1 evidence
 

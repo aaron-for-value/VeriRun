@@ -4,6 +4,8 @@ All notable VeriRun changes are documented here. The project follows [Semantic V
 
 ## Unreleased
 
+## [0.4.0] - 2026-09-02
+
 ### Added
 
 - Deterministic, versioned `VerificationPlan` compilation and lifecycle with frozen

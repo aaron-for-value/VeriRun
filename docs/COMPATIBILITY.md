@@ -15,10 +15,10 @@ VeriRun records exact versions in evidence artifacts. This document lists suppor
 | Container executor | `development-container` + digest-pinned image | Released in v0.3.0 | Docker development tier only; no network, read-only runner mount, non-root, capability drop, and explicit resource limits. Not gVisor evidence. |
 | macOS arm64 | Local development | Supported for protocol work | Not valid gVisor security evidence. |
 | Kubernetes + gVisor | local single-node kind, `runsc` | Released in v0.3.0 | Evidence is limited to the recorded local kind environment; no general cluster security claim. |
-| PostgreSQL | 16.x; smoke recorded on 16.13 | M3 verification | Authoritative v0.4 plan/run/task/attempt/result/command/artifact metadata. HA/failover is not evidenced. |
-| Psycopg | 3.3.5 | M3 development lock | PostgreSQL client; binary distribution is used by the reproducible development environment. |
-| S3-compatible store | MinIO local fixture | M3 verification | Content-addressed byte storage and round-trip integrity only; production object-store compatibility is not yet claimed. |
-| MinIO Python SDK | 7.2.20 | M3 development lock | Used by the S3-compatible adapter and local recovery smoke. |
+| PostgreSQL | 16.x; smoke recorded on 16.13 | Released in v0.4.0 | Authoritative v0.4 plan/run/task/attempt/result/command/artifact metadata. HA/failover is not evidenced. |
+| Psycopg | 3.3.5 | v0.4.0 lock | PostgreSQL client; binary distribution is used by the reproducible development environment. |
+| S3-compatible store | MinIO local fixture | Released in v0.4.0 | Content-addressed byte storage and round-trip integrity only; production object-store compatibility is not claimed. |
+| MinIO Python SDK | 7.2.20 | v0.4.0 lock | Used by the S3-compatible adapter and local recovery smoke. |
 
 ## Compatibility rules
 
@@ -37,7 +37,7 @@ VeriRun records exact versions in evidence artifacts. This document lists suppor
 
 - EvalPlus brings a larger optional dependency tree than the VeriRun core package.
 - The local executor is limited to trusted fixtures.
-- v0.1-v0.3 execution paths retain the local content-addressed artifact store. The M3 control plane adds an S3-compatible adapter, but has only local MinIO evidence.
+- v0.1-v0.3 execution paths retain the local content-addressed artifact store. The v0.4 control plane adds an S3-compatible adapter, but has only local MinIO evidence.
 - Result authenticity and signing are not implemented.
 - The supported workload smoke is a labeled subset, not a leaderboard score.
 - The full M0 fixture evidence is documented separately in `docs/M0_EVALPLUS_EVIDENCE.md`; it remains reproducibility evidence for deterministic candidates, not a model-quality claim.
