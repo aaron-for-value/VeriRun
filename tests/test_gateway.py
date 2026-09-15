@@ -133,7 +133,9 @@ def test_parent_cancellation_cleans_up_and_allows_follow_up_work() -> None:
             batch.cancel()
             with pytest.raises(asyncio.CancelledError):
                 await batch
-            await asyncio.sleep(0.06)
+            async with asyncio.timeout(0.5):
+                while server.active_requests:
+                    await asyncio.sleep(0.005)
             assert server.active_requests == 0
             after = await gateway.generate_one(request("after"))
         assert after.status is GenerationStatus.SUCCEEDED
