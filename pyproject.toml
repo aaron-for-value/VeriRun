@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "verirun"
-version = "0.4.0"
+version = "0.5.0"
 description = "Evidence-first runtime for reproducible executable evaluation and rewards"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
@@ -35,6 +35,9 @@ dependencies = [
 control-plane = [
   "minio>=7.2,<8",
   "psycopg[binary]>=3.3,<4",
+]
+distributed-executor = [
+  "ray[data,default]==2.50.1",
 ]
 evalplus = [
   "evalplus==0.3.1",

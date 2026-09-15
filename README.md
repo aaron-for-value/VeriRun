@@ -3,7 +3,7 @@
 **Evidence-first infrastructure for reproducible, isolated executable evaluation and online rewards.**
 
 > [!IMPORTANT]
-> VeriRun is pre-alpha. **The latest release is [v0.3.0](https://github.com/aaron-for-value/VeriRun/releases/tag/v0.3.0): isolated execution tiers with a narrowly scoped local Kubernetes/gVisor evidence boundary.**
+> VeriRun is pre-alpha. **The latest release is [v0.5.0](https://github.com/aaron-for-value/VeriRun/releases/tag/v0.5.0): bounded Ray/KubeRay CPU trusted-fixture execution under the durable control-plane boundary.**
 > v0.1's local executor remains for trusted fixtures only and is not a security boundary;
 > do not use it for model-generated or otherwise untrusted code.
 
@@ -80,7 +80,7 @@ The control plane owns intent and durable state. The execution plane performs re
 | Bounded async model gateway with cancellation and classified retries | v0.2 | **Released (v0.2.0)** |
 | Digest-pinned container development backend; restricted Kubernetes + gVisor Job contract | v0.3 | **Released (v0.3.0); local kind/gVisor evidence only** |
 | Durable run state, frozen plans, leases, recovery, S3 artifacts, and idempotent commit | v0.4 | **Released (v0.4.0); local PostgreSQL/MinIO evidence** |
-| Ray/KubeRay execution with bounded in-flight work and failure recovery | v0.5 | Planned |
+| Ray/KubeRay execution with bounded in-flight work and failure recovery | v0.5 | **Released (v0.5.0); local CPU trusted-fixture reference** |
 | OpenTelemetry, capacity/chaos evidence, and statistically valid reports | v0.6 | Planned |
 | veRL asynchronous reward integration | v0.7 | Planned |
 | Harbor / Terminal-Bench agent workload integration | v0.8 | Optional |
@@ -238,6 +238,24 @@ control-plane dependency set:
 ./.venv/bin/python -m pip install -e '.[control-plane]'
 ```
 
+The M4 CPU trusted-fixture reference additionally uses the pinned
+Ray Data/Core environment:
+
+```bash
+./.venv/bin/python -m pip install -r requirements/distributed-executor-v0.5.lock.txt
+./.venv/bin/python -m pip install -e . --no-deps
+make distributed-smoke
+make distributed-fault-smoke
+make distributed-concurrency
+```
+
+The fault command exercises task/actor process loss, one transient driver-side
+final-commit outage, a deterministic straggler, and actual Ray object spill metrics.
+The concurrency command records 1/2/4/8/16 logical scheduler-fixture runs; it is
+not a CPU capacity benchmark. These commands are not GPU, external-provider,
+KubeRay-scale, or production-reliability claims. See the
+[distributed-executor boundary](docs/DISTRIBUTED_EXECUTOR.md).
+
 The full `make check` coverage gate includes live PostgreSQL and S3 integration tests.
 Start the pinned local fixture and export the test variables described in the
 [control-plane guide](docs/CONTROL_PLANE.md) before running it.
@@ -325,7 +343,22 @@ examples, recovery procedure, and limitations are in the
 [durable control-plane guide](docs/CONTROL_PLANE.md). The checked-in
 [M3 recovery report](evidence/v0.4/control-plane/REPORT.md) covers a local PostgreSQL
 16.13 + MinIO smoke. Its support and claim boundaries are summarized in the
-[v0.4.0 release notes](docs/releases/v0.4.0.md). The latest supported release is v0.4.0.
+[v0.4.0 release notes](docs/releases/v0.4.0.md). The latest supported release is v0.5.0.
+
+## v0.5 distributed executor
+
+Released in v0.5.0, M4 adds Ray Data manifest sharding and bounded Ray Core
+execution of already-claimed M3 attempts. Workers receive immutable attempt and
+frozen-plan lineage; only the driver may perform the durable final-result commit.
+Task/actor crashes and a transient final-commit outage recover through a fresh M3
+lease claim, never through a framework retry treated as business idempotency.
+
+The checked-in [M4 report](evidence/v0.5/distributed/REPORT.md) records the
+clean-revision local Ray replay, local kind/KubeRay RayJobs, observed object spill,
+and logical 1/2/4/8/16 concurrency fixture. It is limited to CPU trusted fixtures
+on one recorded local environment—not GPU, external-provider, capacity, multi-node,
+or production-reliability evidence. See the [distributed-executor boundary](docs/DISTRIBUTED_EXECUTOR.md)
+and [v0.5.0 release notes](docs/releases/v0.5.0.md).
 
 ## v0.1 evidence
 

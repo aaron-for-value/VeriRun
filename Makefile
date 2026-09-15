@@ -1,4 +1,4 @@
-.PHONY: build check container-smoke control-plane-smoke evidence-container evidence-control-plane evidence-evalplus evidence-evalplus-m0 evidence-gateway evidence-kubernetes evidence-synthetic evalplus-m0 evalplus-smoke format gateway-smoke kubernetes-smoke lint schemas smoke test test-unit typecheck
+.PHONY: build check container-smoke control-plane-smoke distributed-concurrency distributed-fault-smoke distributed-smoke evidence-container evidence-control-plane evidence-distributed evidence-distributed-concurrency evidence-distributed-faults evidence-evalplus evidence-evalplus-m0 evidence-gateway evidence-kubernetes evidence-synthetic evalplus-m0 evalplus-smoke format gateway-smoke kubernetes-smoke lint schemas smoke test test-unit typecheck
 
 PYTHON := .venv/bin/python
 
@@ -51,6 +51,15 @@ kubernetes-smoke:
 	test -n "$(VERIRUN_KUBERNETES_RUNTIME_CLASS)"
 	$(PYTHON) -m verirun kubernetes-smoke --image "$(VERIRUN_CONTAINER_IMAGE)" --kubernetes-context "$(VERIRUN_KUBERNETES_CONTEXT)" --kubernetes-namespace "$(VERIRUN_KUBERNETES_NAMESPACE)" --kubernetes-runtime-class "$(VERIRUN_KUBERNETES_RUNTIME_CLASS)" --output .verirun/evidence/v0.3/kubernetes-smoke
 
+distributed-smoke:
+	$(PYTHON) -m verirun distributed-smoke --output .verirun/evidence/v0.5/distributed-smoke
+
+distributed-fault-smoke:
+	$(PYTHON) -m verirun distributed-fault-smoke --output .verirun/evidence/v0.5/distributed-fault-smoke
+
+distributed-concurrency:
+	$(PYTHON) -m verirun distributed-concurrency --output .verirun/evidence/v0.5/distributed-concurrency
+
 control-plane-smoke:
 	@test -n "$(VERIRUN_POSTGRES_DSN)"
 	@test -n "$(VERIRUN_S3_ENDPOINT)"
@@ -81,6 +90,15 @@ evidence-kubernetes:
 	test -n "$(VERIRUN_KUBERNETES_NAMESPACE)"
 	test -n "$(VERIRUN_KUBERNETES_RUNTIME_CLASS)"
 	$(PYTHON) -m verirun kubernetes-smoke --image "$(VERIRUN_CONTAINER_IMAGE)" --kubernetes-context "$(VERIRUN_KUBERNETES_CONTEXT)" --kubernetes-namespace "$(VERIRUN_KUBERNETES_NAMESPACE)" --kubernetes-runtime-class "$(VERIRUN_KUBERNETES_RUNTIME_CLASS)" --output evidence/v0.3/kubernetes-smoke
+
+evidence-distributed:
+	$(PYTHON) -m verirun distributed-smoke --output evidence/v0.5/distributed-smoke
+
+evidence-distributed-faults:
+	$(PYTHON) -m verirun distributed-fault-smoke --output evidence/v0.5/distributed-fault-smoke
+
+evidence-distributed-concurrency:
+	$(PYTHON) -m verirun distributed-concurrency --output evidence/v0.5/distributed-concurrency
 
 evidence-control-plane:
 	@test -n "$(VERIRUN_POSTGRES_DSN)"

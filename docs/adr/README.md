@@ -7,6 +7,7 @@ VeriRun records decisions that change public protocol identity, execution semant
 | [0001](0001-canonical-protocol-and-hashing.md) | Accepted for v0.1 | Canonical protocol models, algorithm-qualified digests, and semantic replay hashing |
 | [0002](0002-bounded-async-model-gateway.md) | Accepted for v0.2 | Bounded async generation, classified retries, and cancellation cleanup |
 | [0003](0003-frozen-verification-plans-and-durable-commit.md) | Accepted for v0.4 | Frozen comparison plans, durable leases, and effectively-once authoritative result commit |
+| [0004](0004-ray-data-and-core-execution-boundary.md) | Accepted for v0.5 | Ray Data ingestion, bounded Ray Core execution, and control-plane authority boundary |
 
 ## Lifecycle
 

@@ -1,0 +1,15 @@
+.git
+.venv
+.verirun
+__pycache__
+*.egg-info
+.coverage
+.mypy_cache
+.pytest_cache
+.ruff_cache
+build
+dist
+evidence
+task_plan.md
+findings.md
+progress.md

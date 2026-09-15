@@ -4,6 +4,28 @@ All notable VeriRun changes are documented here. The project follows [Semantic V
 
 ## Unreleased
 
+## [0.5.0] - 2026-09-15
+
+### Added
+
+- Bounded Ray Core execution for already-claimed M3 work, with immutable attempt
+  and frozen verification-plan lineage returned to a driver-only durable commit.
+- Ray Data sharding of immutable run-task rows; named CPU verifier, GPU inference,
+  and external API admission pools; and a CPU trusted-fixture reference image.
+- Local Ray and local kind/KubeRay smoke commands, deterministic task/actor crash,
+  transient final-commit, straggler, and observed object-spill fixtures, plus a
+  logical 1/2/4/8/16 concurrency matrix.
+- KubeRay RayJob manifests, an execution-boundary ADR, reproducible dependency
+  lock, and CI coverage for the M4 trusted-fixture contract.
+
+### Security
+
+- Durable final-result authority remains in the M3 control plane. Ray retries and
+  actor replacement are never business-idempotency mechanisms.
+- The release evidence is limited to CPU trusted fixtures on local Ray and one
+  local single-node kind/KubeRay environment. It makes no GPU, provider,
+  multi-node capacity, or production-reliability claim.
+
 ## [0.4.0] - 2026-09-02
 
 ### Added

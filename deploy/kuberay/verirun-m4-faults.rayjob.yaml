@@ -1,0 +1,95 @@
+# Local kind/arm64 M4 fault fixture. Collect status/logs before explicit RayJob deletion.
+apiVersion: ray.io/v1
+kind: RayJob
+metadata:
+  generateName: verirun-m4-faults-
+  labels:
+    app.kubernetes.io/name: verirun
+    app.kubernetes.io/component: m4-fault-fixture
+spec:
+  entrypoint: >-
+    python -m verirun distributed-fault-smoke --output /tmp/verirun-evidence
+    && cat /tmp/verirun-evidence/summary.json
+  shutdownAfterJobFinishes: true
+  ttlSecondsAfterFinished: 120
+  activeDeadlineSeconds: 1800
+  rayClusterSpec:
+    rayVersion: "2.50.1"
+    headGroupSpec:
+      rayStartParams:
+        object-store-memory: "100000000"
+        metrics-export-port: "8080"
+      template:
+        spec:
+          containers:
+            - name: ray-head
+              image: verirun-m4-ray-fixture:local
+              imagePullPolicy: Never
+              ports:
+                - containerPort: 6379
+                  name: gcs-server
+                - containerPort: 8265
+                  name: dashboard
+                - containerPort: 10001
+                  name: client
+                - containerPort: 8080
+                  name: metrics
+              readinessProbe:
+                exec:
+                  command: [ray, health-check, --address=127.0.0.1:6379]
+                initialDelaySeconds: 10
+                periodSeconds: 5
+                failureThreshold: 12
+              livenessProbe:
+                exec:
+                  command: [ray, health-check, --address=127.0.0.1:6379]
+                initialDelaySeconds: 30
+                periodSeconds: 10
+                failureThreshold: 12
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 1Gi
+                limits:
+                  cpu: "1"
+                  memory: 2Gi
+    workerGroupSpecs:
+      - groupName: verifier-cpu
+        replicas: 1
+        minReplicas: 1
+        maxReplicas: 1
+        rayStartParams:
+          num-cpus: "1"
+          resources: "'{\"verifier_cpu\":1}'"
+          object-store-memory: "100000000"
+          metrics-export-port: "8080"
+        template:
+          spec:
+            containers:
+              - name: ray-worker
+                image: verirun-m4-ray-fixture:local
+                imagePullPolicy: Never
+                ports:
+                  - containerPort: 8080
+                    name: metrics
+                readinessProbe:
+                  exec:
+                    command: [bash, -c, 'ray health-check --address="${FQ_RAY_IP}:6379"']
+                  initialDelaySeconds: 10
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+                  failureThreshold: 12
+                livenessProbe:
+                  exec:
+                    command: [bash, -c, 'ray health-check --address="${FQ_RAY_IP}:6379"']
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 12
+                resources:
+                  requests:
+                    cpu: 500m
+                    memory: 1Gi
+                  limits:
+                    cpu: "1"
+                    memory: 2Gi

@@ -39,9 +39,10 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - name: Install core and development dependencies
+      - name: Install core, development, and distributed-executor dependencies
         run: |
           python -m pip install --disable-pip-version-check -r requirements/core-dev.lock.txt
+          python -m pip install --disable-pip-version-check -r requirements/distributed-executor-v0.5.lock.txt
           python -m pip install --disable-pip-version-check -e . --no-deps
       - name: Start S3-compatible test store
         run: |
@@ -86,3 +87,5 @@ jobs:
           --s3-server-identity "minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e"
           --no-s3-secure
           --output .verirun/evidence/v0.4/control-plane
+      - name: Run M4 local Ray trusted-fixture smoke
+        run: python -m verirun distributed-smoke --output .verirun/evidence/v0.5/distributed-smoke

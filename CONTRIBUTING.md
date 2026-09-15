@@ -2,7 +2,7 @@
 
 Thank you for helping build trustworthy executable evaluation and reward infrastructure.
 
-VeriRun is pre-alpha; the latest supported release is v0.4.0. Contracts may evolve quickly, but correctness, provenance, security boundaries, and honest claims are non-negotiable.
+VeriRun is pre-alpha; the latest supported release is v0.5.0. Contracts may evolve quickly, but correctness, provenance, security boundaries, and honest claims are non-negotiable.
 
 ## Before opening a pull request
 
@@ -30,6 +30,14 @@ EvalPlus is an optional benchmark dependency and is installed separately:
 ./.venv/bin/python -m pip install -r requirements/evalplus-v0.1.lock.txt
 ./.venv/bin/python -m pip install -e . --no-deps
 make evalplus-smoke
+```
+
+M4 contributors working on the distributed-executor reference install its
+separate pinned Ray environment before running `make distributed-smoke`:
+
+```bash
+./.venv/bin/python -m pip install -r requirements/distributed-executor-v0.5.lock.txt
+./.venv/bin/python -m pip install -e . --no-deps
 ```
 
 The default smoke targets write ignored local artifacts under `.verirun/`. Maintainers use `make evidence-synthetic` and `make evidence-evalplus` only when intentionally refreshing reviewable milestone evidence from a clean revision.

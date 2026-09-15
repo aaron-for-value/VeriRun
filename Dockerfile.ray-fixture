@@ -1,0 +1,18 @@
+# Local M4 reference only: Linux/arm64 Python 3.12 plus locked Ray trusted fixtures.
+FROM python@sha256:3949e4271b0a3ff82afac7306764c313dcc8edeeb89c0376a3c2ac6007c66b1d
+
+ARG VERIRUN_SOURCE_REVISION=""
+ENV VERIRUN_SOURCE_REVISION=${VERIRUN_SOURCE_REVISION}
+
+RUN groupadd --system ray && useradd --system --gid ray --create-home ray
+WORKDIR /opt/verirun
+
+COPY requirements/distributed-executor-v0.5.lock.txt requirements/distributed-executor-v0.5.lock.txt
+RUN python -m pip install --no-cache-dir -r requirements/distributed-executor-v0.5.lock.txt
+
+COPY pyproject.toml README.md LICENSE ./
+COPY src ./src
+RUN python -m pip install --no-deps . && python -m pip check
+
+USER ray
+WORKDIR /home/ray

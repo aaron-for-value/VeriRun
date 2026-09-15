@@ -10,6 +10,14 @@ from verirun.artifacts import ArtifactStore
 from verirun.canonical import content_hash, write_canonical_json
 from verirun.container_smoke import container_smoke_succeeded, run_container_smoke
 from verirun.control_cli import add_control_parser
+from verirun.distributed_smoke import (
+    distributed_concurrency_succeeded,
+    distributed_fault_smoke_succeeded,
+    distributed_smoke_succeeded,
+    run_distributed_concurrency_matrix,
+    run_distributed_fault_smoke,
+    run_distributed_smoke,
+)
 from verirun.evalplus_m0 import (
     STANDARD_DATASETS,
     STANDARD_RECIPES,
@@ -193,6 +201,42 @@ def _kubernetes_smoke(args: argparse.Namespace) -> int:
     return 0 if kubernetes_smoke_succeeded(summary) else 9
 
 
+def _distributed_smoke(args: argparse.Namespace) -> int:
+    summary = run_distributed_smoke(args.output)
+    environment = summary["environment"]
+    assert isinstance(environment, dict)
+    reference = environment["reference_workload"]
+    print(
+        "distributed_smoke_succeeded="
+        f"{str(distributed_smoke_succeeded(summary)).lower()} "
+        f"reference={reference}"
+    )
+    return 0 if distributed_smoke_succeeded(summary) else 10
+
+
+def _distributed_fault_smoke(args: argparse.Namespace) -> int:
+    summary = run_distributed_fault_smoke(args.output)
+    environment = summary["environment"]
+    assert isinstance(environment, dict)
+    reference = environment["reference_workload"]
+    print(
+        "distributed_fault_smoke_succeeded="
+        f"{str(distributed_fault_smoke_succeeded(summary)).lower()} "
+        f"reference={reference}"
+    )
+    return 0 if distributed_fault_smoke_succeeded(summary) else 11
+
+
+def _distributed_concurrency(args: argparse.Namespace) -> int:
+    summary = run_distributed_concurrency_matrix(args.output)
+    print(
+        "distributed_concurrency_succeeded="
+        f"{str(distributed_concurrency_succeeded(summary)).lower()} "
+        "reference=cpu-trusted-fixtures"
+    )
+    return 0 if distributed_concurrency_succeeded(summary) else 12
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="verirun")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -263,6 +307,32 @@ def build_parser() -> argparse.ArgumentParser:
         "--output", type=Path, default=Path("evidence/v0.3/kubernetes-smoke")
     )
     kubernetes_smoke.set_defaults(handler=_kubernetes_smoke)
+
+    distributed_smoke = subparsers.add_parser(
+        "distributed-smoke", help="run the v0.5 CPU trusted-fixture local Ray replay"
+    )
+    distributed_smoke.add_argument(
+        "--output", type=Path, default=Path("evidence/v0.5/distributed-smoke")
+    )
+    distributed_smoke.set_defaults(handler=_distributed_smoke)
+
+    distributed_fault_smoke = subparsers.add_parser(
+        "distributed-fault-smoke",
+        help="run v0.5 CPU trusted-fixture Ray task/actor/storage/spill fault scenarios",
+    )
+    distributed_fault_smoke.add_argument(
+        "--output", type=Path, default=Path("evidence/v0.5/distributed-fault-smoke")
+    )
+    distributed_fault_smoke.set_defaults(handler=_distributed_fault_smoke)
+
+    distributed_concurrency = subparsers.add_parser(
+        "distributed-concurrency",
+        help="measure M4 1/2/4/8/16 logical CPU trusted-fixture scheduling",
+    )
+    distributed_concurrency.add_argument(
+        "--output", type=Path, default=Path("evidence/v0.5/distributed-concurrency")
+    )
+    distributed_concurrency.set_defaults(handler=_distributed_concurrency)
 
     verify = subparsers.add_parser("verify", help="verify one Python candidate in a declared tier")
     verify.add_argument("--candidate", type=Path, required=True)

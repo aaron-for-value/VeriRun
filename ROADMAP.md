@@ -2,7 +2,7 @@
 
 This roadmap turns VeriRun from a design into an evidence-backed executable evaluation and reward runtime. It is organized by capability gates, not speculative dates.
 
-**Current stage:** v0.4 Durable Control Plane (M3) is complete; v0.5 remains queued
+**Current stage:** v0.5 Distributed Executor (M4) is complete; v0.6 is queued
 
 **Last updated:** 2026-09-02
 
@@ -51,7 +51,7 @@ The project reaches v1.0 only when these properties are demonstrated across supp
 | v0.2 — Async Model Gateway | Bounded model generation with correct failure and cancellation semantics | **Complete (v0.2.0)** |
 | v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | **Complete (v0.3.0; narrow local kind/gVisor boundary)** |
 | v0.4 — Durable Control Plane | Recoverable runs with frozen verification plans, comparable cohorts, leases, heartbeats, replay, and idempotent result commit | **Complete (v0.4.0; local PostgreSQL/MinIO boundary)** |
-| v0.5 — Distributed Executor | Bounded Ray/KubeRay execution with failure recovery | Queued |
+| v0.5 — Distributed Executor | Bounded Ray/KubeRay execution with failure recovery | **Complete (v0.5.0; local CPU trusted-fixture reference)** |
 | v0.6 — Reliability & Evaluation Evidence | Correlated observability, capacity/chaos reports, and valid statistics | Queued |
 | v0.7 — Reward Runtime | Stable asynchronous verifier rewards for veRL | Queued |
 | v0.8 — Agent Workloads | Harbor/TB2 integration with three-stage failure attribution | Optional |
@@ -326,6 +326,9 @@ Run the same manifest locally and through KubeRay while keeping work bounded and
 
 ### Scope
 
+- CPU trusted fixtures are the only M4 live reference workload. GPU inference and
+  external API pools are named-resource admission contracts only; their hardware,
+  provider performance, and reliability are not evidenced in this milestone.
 - Ray Data for versioned dataset ingestion, normalization, and sharding.
 - Ray Core for stateful orchestration and task/actor execution.
 - Every local or Ray task receives the same frozen `VerificationPlan` selected by v0.4; Ray retries and worker takeover never recompute or replace that plan.
@@ -342,9 +345,17 @@ Run the same manifest locally and through KubeRay while keeping work bounded and
 - A Ray Data versus Ray Core ADR is published.
 - At least one component is deliberately not implemented with Ray, with rationale.
 
+**Released in v0.5.0 (2026-09-15):** clean-revision local Ray and local
+kind/KubeRay CPU trusted-fixture evidence covers frozen-plan baseline/replay,
+task/actor crash recovery, one transient final-commit outage, straggler
+completion, observed large-object spill, and the logical 1/2/4/8/16 scheduler
+matrix. The public report retains exact runtime identities and limitations.
+
 ### Not in scope
 
 - Unbounded driver submission.
+- GPU hardware performance, external-provider reliability, or production-scale
+  scheduling claims from the local kind cluster.
 - Ray source changes without an isolated framework defect and minimal reproduction.
 - Treating Ray retries as business idempotency.
 

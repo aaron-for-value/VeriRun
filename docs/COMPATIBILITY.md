@@ -19,6 +19,8 @@ VeriRun records exact versions in evidence artifacts. This document lists suppor
 | Psycopg | 3.3.5 | v0.4.0 lock | PostgreSQL client; binary distribution is used by the reproducible development environment. |
 | S3-compatible store | MinIO local fixture | Released in v0.4.0 | Content-addressed byte storage and round-trip integrity only; production object-store compatibility is not claimed. |
 | MinIO Python SDK | 7.2.20 | v0.4.0 lock | Used by the S3-compatible adapter and local recovery smoke. |
+| Ray Data / Core | 2.50.1 | Released in v0.5.0 | Optional `distributed-executor` extra; CPU trusted-fixture behavior has local Ray and kind/KubeRay evidence only. |
+| KubeRay | v1.4.0 | Released in v0.5.0 | Local single-node kind operator/CRD reference only; no multi-node or production support claim. |
 
 ## Compatibility rules
 
@@ -42,3 +44,6 @@ VeriRun records exact versions in evidence artifacts. This document lists suppor
 - The supported workload smoke is a labeled subset, not a leaderboard score.
 - The full M0 fixture evidence is documented separately in `docs/M0_EVALPLUS_EVIDENCE.md`; it remains reproducibility evidence for deterministic candidates, not a model-quality claim.
 - M3 has no HTTP/authentication layer, database failover evidence, object-store outage chaos, distributed scheduler, or exactly-once execution claim.
+- M4's current validation target is CPU trusted fixtures on local Ray and local
+  kind/KubeRay. Named GPU and external-API resources are admission contracts, not
+  evidence that either resource type is available or reliable.
