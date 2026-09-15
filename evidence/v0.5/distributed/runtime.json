@@ -1,0 +1,62 @@
+{
+  "schema_version": "verirun.distributed-runtime/v1",
+  "collected_at": "2026-09-15T11:35:00Z",
+  "source_revision": "2c2390107887f82c4e955bb7e89d8d23dd57665b",
+  "fixture_image": {
+    "reference": "verirun-m4-ray-fixture:v0.5-evidence",
+    "id": "sha256:dd24800bdb5d29c5cf9383f9e2d67c6952217697cda246108ec55f3fcfcc9a7a",
+    "size_bytes": 258940017,
+    "base_image": "python@sha256:3949e4271b0a3ff82afac7306764c313dcc8edeeb89c0376a3c2ac6007c66b1d",
+    "bound_source_revision": "2c2390107887f82c4e955bb7e89d8d23dd57665b"
+  },
+  "kubernetes": {
+    "context": "kind-verirun-m2",
+    "server_version": "v1.37.0",
+    "node_os": "Debian GNU/Linux 13 (trixie)",
+    "kernel": "6.8.0-100-generic",
+    "architecture": "arm64",
+    "container_runtime": "containerd://2.3.4"
+  },
+  "kuberay": {
+    "operator_image": "quay.io/kuberay/operator:v1.4.0",
+    "crds": {
+      "rayclusters.ray.io": "v1",
+      "rayjobs.ray.io": "v1",
+      "rayservices.ray.io": "v1"
+    }
+  },
+  "rayjobs": [
+    {
+      "name": "verirun-m4-trusted-fixtures-9jgsj",
+      "kind": "baseline-replay",
+      "status": "SUCCEEDED",
+      "started_at": "2026-09-15T11:27:12Z",
+      "completed_at": "2026-09-15T11:27:47Z",
+      "summary": "kuberay/replay-1-summary.json",
+      "explicit_cleanup_verified": true
+    },
+    {
+      "name": "verirun-m4-trusted-fixtures-h49zn",
+      "kind": "baseline-replay",
+      "status": "SUCCEEDED",
+      "started_at": "2026-09-15T11:29:43Z",
+      "completed_at": "2026-09-15T11:30:18Z",
+      "summary": "kuberay/replay-2-summary.json",
+      "explicit_cleanup_verified": true
+    },
+    {
+      "name": "verirun-m4-faults-v2jc5",
+      "kind": "faults",
+      "status": "SUCCEEDED",
+      "started_at": "2026-09-15T11:32:02Z",
+      "completed_at": "2026-09-15T11:32:37Z",
+      "summary": "kuberay/fault-summary.json",
+      "explicit_cleanup_verified": true
+    }
+  ],
+  "post_cleanup": {
+    "rayjobs": 0,
+    "rayclusters": 0,
+    "remaining_pods": ["kuberay-operator-584ddf7bf8-2h44s"]
+  }
+}
