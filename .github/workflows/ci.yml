@@ -50,7 +50,7 @@ jobs:
             --env MINIO_ROOT_USER="$VERIRUN_TEST_S3_ACCESS_KEY" \
             --env MINIO_ROOT_PASSWORD="$VERIRUN_TEST_S3_SECRET_KEY" \
             --publish 127.0.0.1:9000:9000 \
-            minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e \
+            quay.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e \
             server /data
           for attempt in {1..30}; do
             if curl --fail --silent http://127.0.0.1:9000/minio/health/live; then
@@ -84,7 +84,7 @@ jobs:
         run: >-
           python -m verirun control smoke
           --s3-endpoint "$VERIRUN_TEST_S3_ENDPOINT"
-          --s3-server-identity "minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e"
+          --s3-server-identity "quay.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e"
           --no-s3-secure
           --output .verirun/evidence/v0.4/control-plane
       - name: Run M4 local Ray trusted-fixture smoke

@@ -146,7 +146,7 @@ services:
 docker compose -f deploy/m3/compose.yaml up --detach --wait
 export VERIRUN_POSTGRES_DSN='postgresql://USER:PASSWORD@HOST:5432/verirun'
 export VERIRUN_S3_ENDPOINT='HOST:9000'
-export VERIRUN_S3_SERVER_IDENTITY='minio/minio@sha256:IMAGE_DIGEST'
+export VERIRUN_S3_SERVER_IDENTITY='quay.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e'
 export VERIRUN_S3_ACCESS_KEY='ACCESS_KEY'
 export VERIRUN_S3_SECRET_KEY='SECRET_KEY'
 make control-plane-smoke
