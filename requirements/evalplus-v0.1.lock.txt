@@ -26,7 +26,7 @@ fire==0.7.1
 frozenlist==1.8.0
 fsspec==2026.4.0
 google-ai-generativelanguage==0.6.15
-google-api-core==2.32.0
+google-api-core==2.34.0
 google-api-python-client==2.198.0
 google-auth==2.56.2
 google-auth-httplib2==0.4.0
