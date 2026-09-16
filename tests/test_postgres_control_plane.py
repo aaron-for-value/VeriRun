@@ -302,5 +302,11 @@ def test_live_control_plane_smoke(tmp_path: Path) -> None:
         s3_server_identity="minio-test",
     )
     assert summary["succeeded"] is True
+    telemetry = summary["telemetry"]
+    assert isinstance(telemetry, dict)
+    events = telemetry["events"]
+    assert isinstance(events, list)
+    committed = next(event for event in events if event["name"] == "verirun.attempt.commit")
+    assert committed["artifact_sha256"] == summary["artifact_sha256"]
     assert (tmp_path / "summary.json").is_file()
     assert (tmp_path / "REPORT.md").is_file()

@@ -3,7 +3,7 @@
 **Evidence-first infrastructure for reproducible, isolated executable evaluation and online rewards.**
 
 > [!IMPORTANT]
-> VeriRun is pre-alpha. **The latest release is [v0.5.0](https://github.com/aaron-for-value/VeriRun/releases/tag/v0.5.0): bounded Ray/KubeRay CPU trusted-fixture execution under the durable control-plane boundary.**
+> VeriRun is pre-alpha. **The current release candidate is v0.6.0: policy-bound reliability and evaluation evidence over the durable control-plane boundary.**
 > v0.1's local executor remains for trusted fixtures only and is not a security boundary;
 > do not use it for model-generated or otherwise untrusted code.
 
@@ -81,6 +81,7 @@ The control plane owns intent and durable state. The execution plane performs re
 | Digest-pinned container development backend; restricted Kubernetes + gVisor Job contract | v0.3 | **Released (v0.3.0); local kind/gVisor evidence only** |
 | Durable run state, frozen plans, leases, recovery, S3 artifacts, and idempotent commit | v0.4 | **Released (v0.4.0); local PostgreSQL/MinIO evidence** |
 | Ray/KubeRay execution with bounded in-flight work and failure recovery | v0.5 | **Released (v0.5.0); local CPU trusted-fixture reference** |
+| Reliability evidence with telemetry, invalidation policy, and paired statistics | v0.6 | **Release candidate; local CPU trusted-fixture reference** |
 | OpenTelemetry, capacity/chaos evidence, and statistically valid reports | v0.6 | Planned |
 | veRL asynchronous reward integration | v0.7 | Planned |
 | Harbor / Terminal-Bench agent workload integration | v0.8 | Optional |
@@ -343,7 +344,8 @@ examples, recovery procedure, and limitations are in the
 [durable control-plane guide](docs/CONTROL_PLANE.md). The checked-in
 [M3 recovery report](evidence/v0.4/control-plane/REPORT.md) covers a local PostgreSQL
 16.13 + MinIO smoke. Its support and claim boundaries are summarized in the
-[v0.4.0 release notes](docs/releases/v0.4.0.md). The latest supported release is v0.5.0.
+[v0.4.0 release notes](docs/releases/v0.4.0.md). The latest supported release remains
+v0.5.0 until v0.6.0 is tagged.
 
 ## v0.5 distributed executor
 
@@ -359,6 +361,25 @@ and logical 1/2/4/8/16 concurrency fixture. It is limited to CPU trusted fixture
 on one recorded local environment—not GPU, external-provider, capacity, multi-node,
 or production-reliability evidence. See the [distributed-executor boundary](docs/DISTRIBUTED_EXECUTOR.md)
 and [v0.5.0 release notes](docs/releases/v0.5.0.md).
+
+## v0.6 reliability evidence
+
+v0.6 adds OpenTelemetry-backed driver correlation for the M3/M4 control-plane and
+Ray execution paths, policy-bound first-attempt/final-success reliability reports,
+and auditable paired `pass@1`/`pass@k` statistics. A report records why evidence is
+valid, partial, invalid, or statistically insufficient instead of silently treating
+infrastructure exclusions as capability results.
+
+The local reference remains deliberately narrow: CPU trusted fixtures on a single-node
+Ray environment. Its 40-task paired fixture validates report mechanics, not any model;
+the 1/2/4/8/16 matrix remains a logical scheduler reference, not hardware capacity.
+See the [reliability evidence guide](docs/RELIABILITY_EVIDENCE.md) and run:
+
+```bash
+python -m pip install -r requirements/distributed-executor-v0.5.lock.txt
+python -m pip install -r requirements/reliability-evidence-v0.6.lock.txt
+make reliability-smoke
+```
 
 ## v0.1 evidence
 

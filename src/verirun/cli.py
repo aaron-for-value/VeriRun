@@ -35,6 +35,7 @@ from verirun.fixtures import SmokeCase, build_smoke_manifest
 from verirun.gateway_smoke import gateway_smoke_succeeded, run_gateway_smoke
 from verirun.kubernetes_smoke import kubernetes_smoke_succeeded, run_kubernetes_smoke
 from verirun.models import EvalManifest, ExecutionSpec, VerificationResult, VerificationStatus
+from verirun.reliability_smoke import reliability_smoke_succeeded, run_reliability_smoke
 from verirun.replay import compare_results
 from verirun.smoke import run_smoke, smoke_succeeded
 
@@ -237,6 +238,20 @@ def _distributed_concurrency(args: argparse.Namespace) -> int:
     return 0 if distributed_concurrency_succeeded(summary) else 12
 
 
+def _reliability_smoke(args: argparse.Namespace) -> int:
+    summary = run_reliability_smoke(args.output)
+    report = summary["reliability_report"]
+    comparison = summary["paired_comparison"]
+    assert isinstance(report, dict)
+    assert isinstance(comparison, dict)
+    print(
+        "reliability_smoke_succeeded="
+        f"{str(reliability_smoke_succeeded(summary)).lower()} "
+        f"validity={report['validity']} paired_conclusion={comparison['conclusion']}"
+    )
+    return 0 if reliability_smoke_succeeded(summary) else 13
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="verirun")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -333,6 +348,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--output", type=Path, default=Path("evidence/v0.5/distributed-concurrency")
     )
     distributed_concurrency.set_defaults(handler=_distributed_concurrency)
+
+    reliability_smoke = subparsers.add_parser(
+        "reliability-smoke",
+        help="run v0.6 telemetry, policy, fault-reference, and paired-statistics evidence",
+    )
+    reliability_smoke.add_argument(
+        "--output", type=Path, default=Path("evidence/v0.6/reliability-smoke")
+    )
+    reliability_smoke.set_defaults(handler=_reliability_smoke)
 
     verify = subparsers.add_parser("verify", help="verify one Python candidate in a declared tier")
     verify.add_argument("--candidate", type=Path, required=True)

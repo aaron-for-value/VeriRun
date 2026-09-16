@@ -1,0 +1,6 @@
+# Python 3.12 OpenTelemetry snapshot for VeriRun M5/v0.6 development.
+# Install this file before `pip install -e . --no-deps`.
+opentelemetry-api==1.44.0
+opentelemetry-sdk==1.44.0
+opentelemetry-semantic-conventions==0.65b0
+typing-extensions==4.16.0

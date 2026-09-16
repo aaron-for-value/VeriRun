@@ -17,6 +17,9 @@ librt==0.13.0
 mypy==1.20.2
 mypy_extensions==1.1.0
 minio==7.2.20
+opentelemetry-api==1.44.0
+opentelemetry-sdk==1.44.0
+opentelemetry-semantic-conventions==0.65b0
 packaging==26.0
 pathspec==1.1.1
 pluggy==1.6.0

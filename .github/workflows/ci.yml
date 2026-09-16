@@ -39,10 +39,11 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - name: Install core, development, and distributed-executor dependencies
+      - name: Install core, development, distributed, and reliability dependencies
         run: |
           python -m pip install --disable-pip-version-check -r requirements/core-dev.lock.txt
           python -m pip install --disable-pip-version-check -r requirements/distributed-executor-v0.5.lock.txt
+          python -m pip install --disable-pip-version-check -r requirements/reliability-evidence-v0.6.lock.txt
           python -m pip install --disable-pip-version-check -e . --no-deps
       - name: Start S3-compatible test store
         run: |
@@ -89,3 +90,5 @@ jobs:
           --output .verirun/evidence/v0.4/control-plane
       - name: Run M4 local Ray trusted-fixture smoke
         run: python -m verirun distributed-smoke --output .verirun/evidence/v0.5/distributed-smoke
+      - name: Run M5 reliability evidence smoke
+        run: python -m verirun reliability-smoke --output .verirun/evidence/v0.6/reliability-smoke

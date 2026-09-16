@@ -2,9 +2,9 @@
 
 This roadmap turns VeriRun from a design into an evidence-backed executable evaluation and reward runtime. It is organized by capability gates, not speculative dates.
 
-**Current stage:** v0.5 Distributed Executor (M4) is complete; v0.6 is queued
+**Current stage:** v0.6 Reliability & Evaluation Evidence (M5) is in verification
 
-**Last updated:** 2026-09-02
+**Last updated:** 2026-09-16
 
 **Release policy:** a milestone closes only when its evidence is reproducible from the tagged revision.
 
@@ -52,7 +52,7 @@ The project reaches v1.0 only when these properties are demonstrated across supp
 | v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | **Complete (v0.3.0; narrow local kind/gVisor boundary)** |
 | v0.4 — Durable Control Plane | Recoverable runs with frozen verification plans, comparable cohorts, leases, heartbeats, replay, and idempotent result commit | **Complete (v0.4.0; local PostgreSQL/MinIO boundary)** |
 | v0.5 — Distributed Executor | Bounded Ray/KubeRay execution with failure recovery | **Complete (v0.5.0; local CPU trusted-fixture reference)** |
-| v0.6 — Reliability & Evaluation Evidence | Correlated observability, capacity/chaos reports, and valid statistics | Queued |
+| v0.6 — Reliability & Evaluation Evidence | Correlated observability, bounded chaos/reference reports, and valid statistics | **Verification** |
 | v0.7 — Reward Runtime | Stable asynchronous verifier rewards for veRL | Queued |
 | v0.8 — Agent Workloads | Harbor/TB2 integration with three-stage failure attribution | Optional |
 | v1.0 — Stable Runtime | Evidence-backed supported contracts and compatibility policy | Future |
@@ -367,25 +367,32 @@ Operators can trace failures across the system, determine the active bottleneck,
 
 ### Scope
 
-- OpenTelemetry traces, metrics, and log correlation.
-- Run → task → model/sandbox/commit span hierarchy.
-- Queue, model, sandbox, storage, and commit latency decomposition.
-- SLI/SLO definitions for availability, infrastructure error, latency, replay consistency, and cost.
+- OpenTelemetry traces, metrics, and serializable event correlation.
+- Run → attempt → scheduler/worker/control-plane span hierarchy, retaining durable
+  task, attempt, frozen-plan, and available artifact identifiers.
+- Driver-observed worker and durable-commit latency decomposition; adapter-owned
+  model, sandbox, and storage timing fields remain optional evidence inputs.
+- Reliability definitions for first/final success, infrastructure exclusions, retry
+  amplification, latency, replay consistency, and cost.
 - pass@1/pass@k, confidence intervals, paired deltas, and infrastructure exclusion policy.
 - Capacity and chaos experiments.
 
 ### Exit evidence
 
-- A failed task links to attempt metadata, trace, sandbox logs, manifest, and artifacts.
+- An instrumented M3 artifact commit links attempt metadata, trace, frozen-plan, and
+  artifact identity; an adapter may attach its sandbox logs and manifest identifiers.
 - Final success and first-attempt success are reported separately.
 - Retry amplification and infrastructure error rates are visible.
 - Reports automatically mark runs partial or invalid when exclusion thresholds are exceeded.
-- Capacity and chaos reports include environment, versions, sample sizes, hypotheses, findings, and limitations.
+- Bounded chaos and logical-capacity reference reports include environment, versions,
+  sample sizes, hypotheses, findings, and limitations.
 
 ### Not in scope
 
 - A polished dashboard without traceable underlying evidence.
 - A single composite score hiding reliability, cost, and capability tradeoffs.
+- A general model/provider SLO, hardware capacity result, or production claim from
+  CPU trusted fixtures on the local single-node Ray reference.
 
 ## v0.7 — Reward Runtime
 

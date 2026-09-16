@@ -42,6 +42,7 @@ from verirun.distributed import (
     trusted_fixture_operation,
 )
 from verirun.provenance import source_state
+from verirun.reliability import TelemetryRecorder
 
 
 def _new_plane(
@@ -120,7 +121,7 @@ def _initialize_ray(ray: Any) -> None:
     )
 
 
-def _run_once(*, worker_id: str) -> dict[str, object]:
+def _run_once(*, worker_id: str, telemetry: TelemetryRecorder | None = None) -> dict[str, object]:
     ray = _ray()
     _initialize_ray(ray)
     try:
@@ -137,7 +138,8 @@ def _run_once(*, worker_id: str) -> dict[str, object]:
                         ray_resource="verifier_cpu",
                     ),
                 ),
-            )
+            ),
+            telemetry=telemetry,
         ).execute_run(
             plane,
             run_id="m4-trusted-fixtures",
@@ -156,6 +158,7 @@ def _run_once(*, worker_id: str) -> dict[str, object]:
         "result_statuses": [str(result.result_payload["status"]) for result in results],
         "result_plan_digests": [result.verification_plan_digest for result in results],
         "all_commits_inserted": all(outcome.inserted for outcome in outcomes),
+        "telemetry": telemetry.snapshot() if telemetry is not None else None,
     }
 
 

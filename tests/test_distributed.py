@@ -28,6 +28,7 @@ from verirun.distributed import (
     straggler_fixture_operation,
     trusted_fixture_operation,
 )
+from verirun.reliability import TelemetryRecorder
 
 NOW = datetime(2026, 9, 14, 12, 0, tzinfo=UTC)
 
@@ -172,7 +173,8 @@ def test_bounded_ray_executor_commits_driver_verified_results() -> None:
     )
     try:
         plane = _plane_with_run()
-        outcomes = BoundedRayExecutor(_config()).execute_run(
+        telemetry = TelemetryRecorder()
+        outcomes = BoundedRayExecutor(_config(), telemetry=telemetry).execute_run(
             plane,
             run_id="run-m4",
             worker_id="driver-m4",
@@ -186,6 +188,17 @@ def test_bounded_ray_executor_commits_driver_verified_results() -> None:
     results = plane.list_results("run-m4")
     assert len(results) == 3
     assert len({result.verification_plan_digest for result in results}) == 1
+    snapshot = telemetry.snapshot()
+    events = snapshot["events"]
+    assert isinstance(events, list)
+    assert {event["name"] for event in events} >= {
+        "verirun.run.execute",
+        "verirun.attempt.submit",
+        "verirun.attempt.result",
+        "verirun.attempt.commit",
+    }
+    assert {event["comparison_cohort_id"] for event in events if event["task_id"]} == {"cohort-m4"}
+    assert snapshot["metrics"]["verirun.attempt.committed"] == 3.0
 
 
 def test_worker_failure_requires_lease_reclaim_before_retry() -> None:

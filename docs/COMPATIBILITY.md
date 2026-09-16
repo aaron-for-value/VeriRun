@@ -21,6 +21,7 @@ VeriRun records exact versions in evidence artifacts. This document lists suppor
 | MinIO Python SDK | 7.2.20 | v0.4.0 lock | Used by the S3-compatible adapter and local recovery smoke. |
 | Ray Data / Core | 2.50.1 | Released in v0.5.0 | Optional `distributed-executor` extra; CPU trusted-fixture behavior has local Ray and kind/KubeRay evidence only. |
 | KubeRay | v1.4.0 | Released in v0.5.0 | Local single-node kind operator/CRD reference only; no multi-node or production support claim. |
+| OpenTelemetry API / SDK | 1.44.0 | v0.6 evidence contract | Driver-side spans and monotonic metrics are observational; durable control-plane records remain authoritative. |
 
 ## Compatibility rules
 
@@ -47,3 +48,6 @@ VeriRun records exact versions in evidence artifacts. This document lists suppor
 - M4's current validation target is CPU trusted fixtures on local Ray and local
   kind/KubeRay. Named GPU and external-API resources are admission contracts, not
   evidence that either resource type is available or reliable.
+- M5's paired statistics fixture validates report policy and implementation, not model
+  quality. Its local Ray reference is neither a provider SLO nor a hardware-capacity
+  certification; a missing or unavailable spill metric is recorded as a limitation.

@@ -11,9 +11,10 @@ import os
 import time
 import uuid
 from collections.abc import Callable, Mapping
+from contextlib import AbstractContextManager, nullcontext
 from enum import StrEnum
 from importlib import import_module
-from typing import Annotated, Any, Protocol
+from typing import TYPE_CHECKING, Annotated, Any, Protocol
 
 from pydantic import Field, model_validator
 
@@ -27,6 +28,9 @@ from verirun.control_plane import (
     RunTaskRecord,
 )
 from verirun.models import FrozenModel, NonEmpty, Sha256
+
+if TYPE_CHECKING:
+    from verirun.reliability import TelemetryRecorder
 
 
 class DistributedExecutionError(RuntimeError):
@@ -171,8 +175,11 @@ def ray_data_shards(tasks: tuple[RunTaskRecord, ...], *, shard_count: int) -> An
 class BoundedRayExecutor:
     """Submit a finite amount of work with ``ray.wait`` and driver-side commit."""
 
-    def __init__(self, config: RayExecutionConfig) -> None:
+    def __init__(
+        self, config: RayExecutionConfig, *, telemetry: TelemetryRecorder | None = None
+    ) -> None:
         self._config = config
+        self._telemetry = telemetry
 
     def execute_run(
         self,
@@ -199,13 +206,14 @@ class BoundedRayExecutor:
             resources={pool.ray_resource: pool.units_per_task},
             max_retries=0,
         )
-        return self._execute_claims(
-            plane,
-            run_id=run_id,
-            worker_id=worker_id,
-            resource_class=resource_class,
-            submit_work=lambda item: remote_operation.remote(item, operation),
-        )
+        with self._span("verirun.run.execute", component="scheduler", run_id=run_id):
+            return self._execute_claims(
+                plane,
+                run_id=run_id,
+                worker_id=worker_id,
+                resource_class=resource_class,
+                submit_work=lambda item: remote_operation.remote(item, operation),
+            )
 
     def execute_run_with_actor(
         self,
@@ -239,13 +247,14 @@ class BoundedRayExecutor:
             )
             .remote()
         )
-        return self._execute_claims(
-            plane,
-            run_id=run_id,
-            worker_id=worker_id,
-            resource_class=resource_class,
-            submit_work=lambda item: actor.execute.remote(item, operation),
-        )
+        with self._span("verirun.run.execute", component="scheduler", run_id=run_id):
+            return self._execute_claims(
+                plane,
+                run_id=run_id,
+                worker_id=worker_id,
+                resource_class=resource_class,
+                submit_work=lambda item: actor.execute.remote(item, operation),
+            )
 
     def _execute_claims(
         self,
@@ -287,7 +296,17 @@ class BoundedRayExecutor:
                     verification_plan_digest=lease.verification_plan_digest,
                     resource_class=resource_class,
                 )
-                in_flight[submit_work(item)] = item
+                with self._span(
+                    "verirun.attempt.submit",
+                    component="scheduler",
+                    run_id=item.run_id,
+                    task_id=item.task_id,
+                    attempt_id=item.attempt_id,
+                    verification_plan_digest=item.verification_plan_digest,
+                    comparison_cohort_id=run.cohort_id,
+                ):
+                    in_flight[submit_work(item)] = item
+                    self._add_metric("verirun.attempt.submitted", 1)
 
             if not in_flight:
                 return tuple(outcomes)
@@ -295,33 +314,71 @@ class BoundedRayExecutor:
             ready, _ = ray.wait(list(in_flight), num_returns=1)
             reference = ready[0]
             item = in_flight.pop(reference)
+            wait_started = time.perf_counter()
             try:
-                result = ray.get(reference)
+                with self._span(
+                    "verirun.attempt.result",
+                    component="worker",
+                    run_id=item.run_id,
+                    task_id=item.task_id,
+                    attempt_id=item.attempt_id,
+                    verification_plan_digest=item.verification_plan_digest,
+                    comparison_cohort_id=run.cohort_id,
+                ):
+                    result = ray.get(reference)
             except Exception as exc:  # Ray reports task/worker failures as framework errors.
+                self._add_metric("verirun.attempt.ray_failure", 1)
                 raise DistributedExecutionError(
                     f"Ray failed attempt {item.attempt_id}; lease remains reclaimable"
                 ) from exc
+            self._record_latency("worker", int((time.perf_counter() - wait_started) * 1000))
             if result.attempt_id != item.attempt_id:
                 raise DistributedExecutionError(
                     "Ray result attempt lineage does not match its claim"
                 )
             if result.verification_plan_digest != item.verification_plan_digest:
                 raise DistributedExecutionError("Ray result changed the frozen verification plan")
+            commit_started = time.perf_counter()
             try:
-                outcome = plane.commit_result(
-                    item.attempt_id,
-                    worker_id=worker_id,
-                    lease_token=item.lease_token,
-                    result_digest=content_hash(result.result_payload),
-                    result_payload=result.result_payload,
-                    failure_domain=result.failure_domain,
-                )
+                with self._span(
+                    "verirun.attempt.commit",
+                    component="control-plane",
+                    run_id=item.run_id,
+                    task_id=item.task_id,
+                    attempt_id=item.attempt_id,
+                    verification_plan_digest=item.verification_plan_digest,
+                    comparison_cohort_id=run.cohort_id,
+                ):
+                    outcome = plane.commit_result(
+                        item.attempt_id,
+                        worker_id=worker_id,
+                        lease_token=item.lease_token,
+                        result_digest=content_hash(result.result_payload),
+                        result_payload=result.result_payload,
+                        failure_domain=result.failure_domain,
+                    )
             except Exception as exc:
+                self._add_metric("verirun.attempt.commit_failure", 1)
                 raise DistributedExecutionError(
                     "durable commit failed for attempt "
                     f"{item.attempt_id}; lease remains reclaimable"
                 ) from exc
+            self._record_latency("commit", int((time.perf_counter() - commit_started) * 1000))
+            self._add_metric("verirun.attempt.committed", 1)
             outcomes.append(outcome)
+
+    def _span(self, *args: Any, **kwargs: Any) -> AbstractContextManager[object]:
+        if self._telemetry is None:
+            return nullcontext()
+        return self._telemetry.span(*args, **kwargs)
+
+    def _add_metric(self, name: str, value: float) -> None:
+        if self._telemetry is not None:
+            self._telemetry.add_metric(name, value)
+
+    def _record_latency(self, component: str, latency_ms: int) -> None:
+        if self._telemetry is not None:
+            self._telemetry.record_latency(component, latency_ms)
 
 
 def _candidate_hash(plane: ControlPlaneExecutionBackend, lease: AttemptLease) -> str:

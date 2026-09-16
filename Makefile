@@ -1,4 +1,4 @@
-.PHONY: build check container-smoke control-plane-smoke distributed-concurrency distributed-fault-smoke distributed-smoke evidence-container evidence-control-plane evidence-distributed evidence-distributed-concurrency evidence-distributed-faults evidence-evalplus evidence-evalplus-m0 evidence-gateway evidence-kubernetes evidence-synthetic evalplus-m0 evalplus-smoke format gateway-smoke kubernetes-smoke lint schemas smoke test test-unit typecheck
+.PHONY: build check container-smoke control-plane-smoke distributed-concurrency distributed-fault-smoke distributed-smoke evidence-container evidence-control-plane evidence-distributed evidence-distributed-concurrency evidence-distributed-faults evidence-evalplus evidence-evalplus-m0 evidence-gateway evidence-kubernetes evidence-reliability evidence-synthetic evalplus-m0 evalplus-smoke format gateway-smoke kubernetes-smoke lint reliability-smoke schemas smoke test test-unit typecheck
 
 PYTHON := .venv/bin/python
 
@@ -60,6 +60,9 @@ distributed-fault-smoke:
 distributed-concurrency:
 	$(PYTHON) -m verirun distributed-concurrency --output .verirun/evidence/v0.5/distributed-concurrency
 
+reliability-smoke:
+	$(PYTHON) -m verirun reliability-smoke --output .verirun/evidence/v0.6/reliability-smoke
+
 control-plane-smoke:
 	@test -n "$(VERIRUN_POSTGRES_DSN)"
 	@test -n "$(VERIRUN_S3_ENDPOINT)"
@@ -99,6 +102,9 @@ evidence-distributed-faults:
 
 evidence-distributed-concurrency:
 	$(PYTHON) -m verirun distributed-concurrency --output evidence/v0.5/distributed-concurrency
+
+evidence-reliability:
+	$(PYTHON) -m verirun reliability-smoke --output evidence/v0.6/reliability-smoke
 
 evidence-control-plane:
 	@test -n "$(VERIRUN_POSTGRES_DSN)"

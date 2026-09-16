@@ -2,7 +2,16 @@
 
 All notable VeriRun changes are documented here. The project follows [Semantic Versioning](docs/VERSIONING.md) once a release is tagged.
 
-## Unreleased
+## [0.6.0] - 2026-09-16
+
+### Added
+
+- OpenTelemetry-backed M3/M4 driver correlation, serializable telemetry events, and
+  policy-bound reliability reports that retain first-attempt and final-success rates.
+- Paired `pass@1`/`pass@k` report mechanics with Wilson intervals, deterministic
+  paired-bootstrap deltas, lineage/exclusion invalidation, and a minimum-sample gate.
+- A local CPU trusted-fixture M5 evidence command combining telemetry baseline/replay,
+  established recovery fixtures, logical concurrency reference, and limitations.
 
 ## [0.5.0] - 2026-09-15
 

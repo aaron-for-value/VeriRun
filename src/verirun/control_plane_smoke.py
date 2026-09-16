@@ -26,6 +26,7 @@ from verirun.control_plane import (
 )
 from verirun.postgres import MIGRATION_VERSION, PostgresControlPlane
 from verirun.provenance import source_state
+from verirun.reliability import TelemetryRecorder
 from verirun.s3_artifacts import S3ArtifactStore
 
 
@@ -108,6 +109,7 @@ def run_control_plane_smoke(
     cohort_id = f"m3-smoke-cohort-{session}"
     plan_id = f"m3-smoke-plan-{session}"
     run_id = f"m3-smoke-run-{session}"
+    telemetry = TelemetryRecorder()
     plane = PostgresControlPlane(dsn)
     plane.migrate()
     plan_digest = _freeze(
@@ -118,27 +120,43 @@ def run_control_plane_smoke(
         now=now,
     )
     plan = plane.get_plan(plan_id, 1)
-    plane.create_run(
-        idempotency_key=f"create-{run_id}",
+    with telemetry.span(
+        "verirun.run.create",
+        component="control-plane",
         run_id=run_id,
-        requested_cohort_id=cohort_id,
-        plan_id=plan_id,
-        plan_revision=1,
-        plan_digest=plan_digest,
-        tasks=(
-            RunTaskInput(task_id="task-a", candidate_id="candidate-a", candidate_hash="1" * 64),
-            RunTaskInput(task_id="task-b", candidate_id="candidate-b", candidate_hash="2" * 64),
-        ),
-        now=now,
-    )
-    first_attempt = plane.claim_task(
+        verification_plan_digest=plan_digest,
+        comparison_cohort_id=cohort_id,
+    ):
+        plane.create_run(
+            idempotency_key=f"create-{run_id}",
+            run_id=run_id,
+            requested_cohort_id=cohort_id,
+            plan_id=plan_id,
+            plan_revision=1,
+            plan_digest=plan_digest,
+            tasks=(
+                RunTaskInput(task_id="task-a", candidate_id="candidate-a", candidate_hash="1" * 64),
+                RunTaskInput(task_id="task-b", candidate_id="candidate-b", candidate_hash="2" * 64),
+            ),
+            now=now,
+        )
+    with telemetry.span(
+        "verirun.attempt.claim",
+        component="control-plane",
         run_id=run_id,
-        worker_id="worker-before-restart",
+        task_id="task-a",
         attempt_id=f"attempt-old-{session}",
-        lease_token=f"lease-old-{session}",
-        lease_seconds=1,
-        now=now,
-    )
+        verification_plan_digest=plan_digest,
+        comparison_cohort_id=cohort_id,
+    ):
+        first_attempt = plane.claim_task(
+            run_id=run_id,
+            worker_id="worker-before-restart",
+            attempt_id=f"attempt-old-{session}",
+            lease_token=f"lease-old-{session}",
+            lease_seconds=1,
+            now=now,
+        )
     assert first_attempt is not None
 
     restarted = PostgresControlPlane(dsn)
@@ -180,14 +198,24 @@ def run_control_plane_smoke(
         now=now + timedelta(seconds=4),
     )
     restarted.register_artifact(artifact_metadata)
-    first_commit = restarted.commit_result(
-        takeover.attempt_id,
-        worker_id=takeover.worker_id,
-        lease_token=takeover.lease_token,
-        result_digest=artifact_ref.sha256,
-        result_payload={"status": "passed", "artifact_sha256": artifact_ref.sha256},
-        now=now + timedelta(seconds=4),
-    )
+    with telemetry.span(
+        "verirun.attempt.commit",
+        component="control-plane",
+        run_id=run_id,
+        task_id=takeover.task_id,
+        attempt_id=takeover.attempt_id,
+        verification_plan_digest=plan_digest,
+        comparison_cohort_id=cohort_id,
+        artifact_sha256=artifact_ref.sha256,
+    ):
+        first_commit = restarted.commit_result(
+            takeover.attempt_id,
+            worker_id=takeover.worker_id,
+            lease_token=takeover.lease_token,
+            result_digest=artifact_ref.sha256,
+            result_payload={"status": "passed", "artifact_sha256": artifact_ref.sha256},
+            now=now + timedelta(seconds=4),
+        )
     repeated_commit = restarted.commit_result(
         takeover.attempt_id,
         worker_id=takeover.worker_id,
@@ -278,6 +306,7 @@ def run_control_plane_smoke(
             "s3_bucket": s3_bucket,
         },
         "source": source_state(),
+        "telemetry": telemetry.snapshot(),
         "session": session,
         "plan_id": plan_id,
         "verification_plan_digest": plan_digest,
