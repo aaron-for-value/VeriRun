@@ -2,7 +2,7 @@
 
 This roadmap turns VeriRun from a design into an evidence-backed executable evaluation and reward runtime. It is organized by capability gates, not speculative dates.
 
-**Current stage:** v0.6 Reliability & Evaluation Evidence (M5) is in verification
+**Current stage:** v0.6 Reliability & Evaluation Evidence (M5) is complete; v0.7 is queued
 
 **Last updated:** 2026-09-16
 
@@ -52,7 +52,7 @@ The project reaches v1.0 only when these properties are demonstrated across supp
 | v0.3 — Isolated Execution | Explicit local/container/Kubernetes execution tiers and attack evidence | **Complete (v0.3.0; narrow local kind/gVisor boundary)** |
 | v0.4 — Durable Control Plane | Recoverable runs with frozen verification plans, comparable cohorts, leases, heartbeats, replay, and idempotent result commit | **Complete (v0.4.0; local PostgreSQL/MinIO boundary)** |
 | v0.5 — Distributed Executor | Bounded Ray/KubeRay execution with failure recovery | **Complete (v0.5.0; local CPU trusted-fixture reference)** |
-| v0.6 — Reliability & Evaluation Evidence | Correlated observability, bounded chaos/reference reports, and valid statistics | **Verification** |
+| v0.6 — Reliability & Evaluation Evidence | Correlated observability, bounded chaos/reference reports, and valid statistics | **Complete (v0.6.0; local CPU trusted-fixture reference)** |
 | v0.7 — Reward Runtime | Stable asynchronous verifier rewards for veRL | Queued |
 | v0.8 — Agent Workloads | Harbor/TB2 integration with three-stage failure attribution | Optional |
 | v1.0 — Stable Runtime | Evidence-backed supported contracts and compatibility policy | Future |
@@ -393,6 +393,12 @@ Operators can trace failures across the system, determine the active bottleneck,
 - A single composite score hiding reliability, cost, and capability tradeoffs.
 - A general model/provider SLO, hardware capacity result, or production claim from
   CPU trusted fixtures on the local single-node Ray reference.
+
+**Released in v0.6.0 (2026-09-16):** clean-revision evidence records M3 artifact
+commit trace correlation and the local M4 CPU trusted-fixture baseline/replay,
+recovery-chaos, logical-concurrency, reliability-policy, and paired-statistics
+contracts. The full GitHub CI quality gate including M5 smoke passed. No model,
+provider, hardware-capacity, GPU, multi-node, or production claim is implied.
 
 ## v0.7 — Reward Runtime
 
