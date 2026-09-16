@@ -24,7 +24,7 @@ jobs:
         run: python -m verirun evalplus-smoke --output evidence/v0.1/evalplus
       - name: Upload compatibility evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: verirun-v0.1-evalplus-smoke
           path: evidence/v0.1/evalplus
