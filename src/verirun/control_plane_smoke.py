@@ -104,6 +104,7 @@ def run_control_plane_smoke(
 ) -> dict[str, object]:
     """Run the M3 live recovery contract and write canonical evidence."""
 
+    source = source_state()
     session = uuid4().hex[:12]
     now = datetime.now(UTC)
     cohort_id = f"m3-smoke-cohort-{session}"
@@ -305,7 +306,7 @@ def run_control_plane_smoke(
             "s3_server_identity": s3_server_identity,
             "s3_bucket": s3_bucket,
         },
-        "source": source_state(),
+        "source": source,
         "telemetry": telemetry.snapshot(),
         "session": session,
         "plan_id": plan_id,

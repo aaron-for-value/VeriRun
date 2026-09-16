@@ -137,6 +137,7 @@ def reliability_smoke_markdown(summary: dict[str, object]) -> str:
 def run_reliability_smoke(output: Path) -> dict[str, object]:
     """Write one transparent M5 evidence bundle from bounded local references."""
 
+    source = source_state()
     policy = ReliabilityPolicy(policy_id="m5-cpu-trusted-fixtures", version="v1")
     baseline_recorder = TelemetryRecorder()
     replay_recorder = TelemetryRecorder()
@@ -184,7 +185,7 @@ def run_reliability_smoke(output: Path) -> dict[str, object]:
                 "local single-node reference; no model/provider/hardware-capacity claim"
             ),
         },
-        "source": source_state(),
+        "source": source,
         "policy": policy.model_dump(mode="json"),
         "baseline": baseline,
         "replay": replay,
