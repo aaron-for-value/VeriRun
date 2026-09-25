@@ -16,7 +16,7 @@ charset-normalizer==3.4.9
 click==8.4.2
 coverage==7.15.2
 cryptography==49.0.0
-datasets==5.0.0
+datasets==5.0.1
 dill==0.4.1
 distro==1.9.0
 docstring_parser==0.18.0
